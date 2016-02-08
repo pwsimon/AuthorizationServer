@@ -1,0 +1,46 @@
+HKCR
+{
+	oAuth.TokenFile.1 = s 'TokenFile Class'
+	{
+		CLSID = s '{A81A158E-D7F3-4224-A944-830FEBAAD484}'
+	}
+	oAuth.TokenFile = s 'TokenFile Class'
+	{		
+		CurVer = s 'oAuth.TokenFile.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {A81A158E-D7F3-4224-A944-830FEBAAD484} = s 'TokenFile Class'
+		{
+			ProgID = s 'oAuth.TokenFile.1'
+			VersionIndependentProgID = s 'oAuth.TokenFile'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{D15C842E-5C07-4F67-B140-D2C82A488220}'
+			Version = s '1.0'
+			val AppID = s '%APPID%'
+		}
+	}
+	.TokenResponse-user = s 'oAuth.TokenFile.1'
+	{
+	}
+}
+
+HKLM
+{
+	NoRemove SOFTWARE
+	{
+		NoRemove Classes
+		{
+			NoRemove AppID
+			{
+				ForceRemove {26994C40-1DA1-4466-97D9-160FF331D921}
+				{
+					val DllSurrogate = s ''
+				}
+			}
+		}
+	}
+}

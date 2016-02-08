@@ -1,0 +1,55 @@
+// oAuth.idl : IDL source for oAuth
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (oAuth.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	oleautomation,
+	uuid(FDC61412-9511-41D9-BE29-EBD9016AA565),
+	helpstring("shared token file"),
+	pointer_default(unique)
+]
+interface IAuthorize : IUnknown
+{
+	HRESULT AuthorizeRequest([in] IDispatch* pXMLHttpReq, [out] BSTR* pbstrAccessToken);
+	HRESULT CanRetryImmediately([in] IDispatch* pXMLHttpReq, [in] BSTR bstrAccessToken);
+	HRESULT FinalizeRequest([in] IDispatch* pXMLHttpReq);
+	HRESULT LockForRenew([in] IUnknown* pRenewCallback, [out] IUnknown** ppXMLHttpReq, [out] VARIANT* pvarBody);
+	HRESULT UnLockFromRenew();
+};
+
+[
+	object,
+	oleautomation,
+	uuid(63E60B3F-4050-42A3-B84C-263D975D4643),
+	helpstring("notify for async complete/terminate"),
+	pointer_default(unique)
+]
+interface IRenewCallback : IUnknown
+{
+	HRESULT Continue();
+	HRESULT Terminate();
+};
+
+[
+	uuid(D15C842E-5C07-4F67-B140-D2C82A488220),
+	version(1.0),
+]
+library oAuthLib
+{
+	importlib("stdole2.tlb");
+	interface IRenewCallback;
+
+	[
+		uuid(A81A158E-D7F3-4224-A944-830FEBAAD484)		
+	]
+	coclass TokenFile
+	{
+		[default] interface IAuthorize;
+	};
+};
