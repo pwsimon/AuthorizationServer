@@ -1,0 +1,9 @@
+dlldata.c
+*_i.c
+*_i.h
+*_p.c
+*.user
+*.suo
+*.sdf
+Debug/
+packages/
