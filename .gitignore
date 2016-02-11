@@ -6,6 +6,7 @@ dlldata.c
 *.suo
 *.sdf
 *.opensdf
+*.aps
 *.bak
 Debug/
 packages/

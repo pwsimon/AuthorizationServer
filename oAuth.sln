@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oAuth", "oAuth.vcxproj", "{168C1DA4-04FF-4EF4-A201-88BC0862D87B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFCApplication", "Clients\MFCApplication\MFCApplication.vcxproj", "{BC976CBE-4B9E-4320-BBE1-A911CAFAC6E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -15,6 +17,10 @@ Global
 		{168C1DA4-04FF-4EF4-A201-88BC0862D87B}.Debug|Win32.Build.0 = Debug|Win32
 		{168C1DA4-04FF-4EF4-A201-88BC0862D87B}.Release|Win32.ActiveCfg = Release|Win32
 		{168C1DA4-04FF-4EF4-A201-88BC0862D87B}.Release|Win32.Build.0 = Release|Win32
+		{BC976CBE-4B9E-4320-BBE1-A911CAFAC6E1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BC976CBE-4B9E-4320-BBE1-A911CAFAC6E1}.Debug|Win32.Build.0 = Debug|Win32
+		{BC976CBE-4B9E-4320-BBE1-A911CAFAC6E1}.Release|Win32.ActiveCfg = Release|Win32
+		{BC976CBE-4B9E-4320-BBE1-A911CAFAC6E1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
