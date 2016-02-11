@@ -18,5 +18,8 @@ i start publishing very early to train/learn how to develop with GitHub.
 RoadMap:
 - ready to run Server component
 - library for easy Client development
-- tool to perfom UserConsent and creating config files
+- public/online simulator (fake) Service API for quick and easy demo
+- ready to run sample (oacurl) for quick and easy demo
+- tool to perfom UserConsent on real Service APIs
 - redistributable package (.msi merge module)
+- installer package 

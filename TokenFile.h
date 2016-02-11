@@ -8,8 +8,6 @@
 //   NuGet Package, Version 2.7.0 (desktop), https://github.com/Microsoft/cpprestsdk
 #include <cpprest/json.h>
 
-#define CLIENT_SECRET			_T("_client_secret.json")
-
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
@@ -78,7 +76,6 @@ public:
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 	HRESULT FinalConstruct();
-	HRESULT DeleteFile();
 	HRESULT LoadTokenResponseFromFile(LPCOLESTR pszFileName, DWORD dwMode);
 	HRESULT UpdateAccessRefreshToken(BSTR bstrResponseText);
 
@@ -139,9 +136,8 @@ private:
 	// theFile
 	CString m_strFileName;
 	DWORD m_lCookieRegister;
-	ATL::CString m_strAPIPrefix;
 
-	// content from <APIPrefix>_client_secret.json file
+	// content from client_secret_<ClientId>.json file
 	ATL::CString m_strClientId;
 	ATL::CString m_strSecret;
 

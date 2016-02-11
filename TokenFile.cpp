@@ -15,11 +15,6 @@ HRESULT CTokenFile::FinalConstruct()
 	return NOERROR;
 }
 
-HRESULT CTokenFile::DeleteFile()
-{
-	ATLTRACENOTIMPL(_T("CTokenFile::DeleteFile()\n"));
-}
-
 /*
 * return values
 *   S_OK,         file geoeffnet mit tokens
@@ -83,21 +78,23 @@ STDMETHODIMP CTokenFile::Load(
 
 	try
 	{
-		const CString strFileName(pszFileName);
-		const int iFileNamePos = strFileName.ReverseFind(_T('\\')) + 1;
-		const int iPrefixPos = strFileName.Find(_T('.'), iFileNamePos);
-		m_strAPIPrefix = strFileName.Mid(iFileNamePos, iPrefixPos - iFileNamePos);
+		TCHAR szClientSecretFileName[MAX_PATH];
+		wcscpy_s(szClientSecretFileName, MAX_PATH, pszFileName);
+		::PathRenameExtension(szClientSecretFileName, _T(".json"));
+#ifdef _DEBUG
+		const CString strFileName = ::PathFindFileName(pszFileName);
+		const int iPrefixPos = strFileName.Find(_T("client_secret_"));
+		const int iExtensionPos = strFileName.Find(_T(".TokenResponse-user"));
+		const CString strClientId = strFileName.Mid(iPrefixPos + 14, iExtensionPos - iPrefixPos - 14);
+#endif
 
 		// How to: Work with JSON Data (C++ REST SDK)
 		//   https://msdn.microsoft.com/en-us/library/jj950082.aspx
-		// diese configuration/settings werden aus der "%appdata%/estos/procall 5/<bstrAPIPrefix>_client_secret.json" geladen
+		// diese configuration/settings werden aus der "%appdata%/client_secret_<ClientId>.json" geladen
 		// 
 		// dieses file wird durch download als ergebnis des registrierungs prozesses durch die entsprechende "Developer-Console" bereitgestellt.
 		{
-			CString strClientSecretFileName;
-			strClientSecretFileName.Format(_T("%s") CLIENT_SECRET, (LPCTSTR)strFileName.Left(iPrefixPos));
-
-			std::fstream is((LPCTSTR) strClientSecretFileName);
+			std::fstream is(szClientSecretFileName);
 			web::json::value root = web::json::value::parse(is);
 
 			m_strClientId = root[_T("installed")][_T("client_id")].as_string().c_str();
@@ -164,7 +161,7 @@ STDMETHODIMP CTokenFile::AuthorizeRequest(
 {
 #ifdef _DEBUG
 	// IPersistFile::Load() MUSS (erfolgreich) gelaufen sein
-	_ASSERT(!m_strAPIPrefix.IsEmpty());
+	_ASSERT(!m_strClientId.IsEmpty());
 
 	// es MUSS eine gueltige konfiguration vorliegen
 	// wurde durch IPersistFile::Load() geladen
@@ -196,7 +193,7 @@ STDMETHODIMP CTokenFile::AuthorizeRequest(
 	CString strAuthorization;
 	strAuthorization.Format(_T("%s %s"), (LPCTSTR)m_strTokenType, (LPCTSTR)m_strAccessToken);
 	HRESULT hr = spXMLHttp->setRequestHeader(L"Authorization", (LPCTSTR)strAuthorization);
-	ATLTRACE2(atlTraceGeneral, 0, _T("  CTokenFile(%s)::IAuthorize::AuthorizeRequest() Authorization: %s\n"), m_strAPIPrefix, strAuthorization);
+	ATLTRACE2(atlTraceGeneral, 0, _T("  CTokenFile(%s)::IAuthorize::AuthorizeRequest() Authorization: %s\n"), m_strClientId, strAuthorization);
 	ATLTRACE2(atlTraceGeneral, 1, _T("0x%.8x = CTokenFile::IAuthorize::AuthorizeRequest()\n"), hr);
 	*pbstrAccessToken = m_strAccessToken.AllocSysString();
 	return hr;
@@ -222,7 +219,7 @@ STDMETHODIMP CTokenFile::LockForRenew(
 	/* [out] */ IUnknown** ppXMLHttpReq,
 	/* [out] */ VARIANT *pvarBody)
 {
-	ATLTRACE2(atlTraceGeneral, 0, _T("CTokenFile(%s)::IAuthorize::LockForRenew()\n"), m_strAPIPrefix);
+	ATLTRACE2(atlTraceGeneral, 0, _T("CTokenFile(%s)::IAuthorize::LockForRenew()\n"), m_strClientId);
 	if (NULL == m_spLockForRenew)
 	{
 		// das obenstehende if (NULL == m_spLockForRenew) ist nur sicher wenn das alles singlethreaded ist
@@ -267,7 +264,7 @@ STDMETHODIMP CTokenFile::LockForRenew(
 
 STDMETHODIMP CTokenFile::UnLockFromRenew(void)
 {
-	ATLTRACE2(atlTraceGeneral, 0, _T("  CTokenFile(%s)::IAuthorize::UnLockFromRenew()\n"), m_strAPIPrefix);
+	ATLTRACE2(atlTraceGeneral, 0, _T("  CTokenFile(%s)::IAuthorize::UnLockFromRenew()\n"), m_strClientId);
 
 	HRESULT hr = E_FAIL;
 	if (200 == m_spLockForRenew->status)
@@ -284,10 +281,18 @@ STDMETHODIMP CTokenFile::UnLockFromRenew(void)
 		// wir muessen das "<APIPrefix>.Apis.Auth.OAuth2.Responses.TokenResponse-user" loeschen. der ConsentWorkflow MUSS erneut durchgefuehrt werden 
 		ATLTRACE2(atlTraceRefcount, 0, _T("  CRenewTokenAsync::IXMLDOMDocumentEvents::UnLockFromRenew() User canceled Token! perform ConsentWorkflow again\n"));
 
-		// anstatt unseren clients, indirekt ueber das loeschen der datei, mit zu teilen das JETZT schluss ist
-		// gibt unser Workflow kuenftig bei jeder AuthorizeRequest, CanRetryImmediately,... ein E_UNEXPECTED zurueck
-		// das File Loeschen wir natuerlich auch so das kuenftige anforderungen auch fehlschlagen
-		DeleteFile();
+		/*
+		* anstatt unseren clients, indirekt ueber das loeschen der datei, mit zu teilen das JETZT schluss ist
+		* gibt unser Workflow kuenftig bei jeder AuthorizeRequest, CanRetryImmediately,... ein E_UNEXPECTED zurueck
+		* das File loeschen wir natuerlich auch so das kuenftige anforderungen auch fehlschlagen
+		*
+		* hmmm file loeschen, eher nicht so gut bzw. evtl. nicht ausreichend denn das sind ja wir das heisst mindestens:
+		* - wir liefern ab jetzt bei JEDEM aufruf ein E_FAIL
+		* - durch das loeschen verhindern wir zuverlaessig das jemand einen server mit abgelaufenen credentials erzeugt
+		*
+		* alternative:
+		* - wir schreiben das file mit ""expires_in" : 0" zurueck
+		*/
 
 		hr = E_FAIL; // tell your caller: stop immendiately
 	}
