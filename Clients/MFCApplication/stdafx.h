@@ -5,6 +5,7 @@
 
 #pragma once
 
+#define _ATL_APARTMENT_THREADED 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
 #endif
@@ -48,6 +49,8 @@
 
 // all of our client clases are based on COM were using ATL to built COM classes
 #include <atlcom.h>
+#include <atlbase.h>
+#include <atlctl.h>
 
 // were using XMLHTTPRequest for network access
 #import <msxml4.dll> no_function_mapping

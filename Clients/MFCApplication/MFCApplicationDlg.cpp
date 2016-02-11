@@ -144,11 +144,7 @@ HCURSOR CMFCApplicationDlg::OnQueryDragIcon()
 
 void CMFCApplicationDlg::OnBnClickedRunping()
 {
-	/* needs ATL Module
 	CComObject < CSimulatorPing >* pTask = NULL;
 	HRESULT hr = CComObject < CSimulatorPing >::CreateInstance(&pTask);
-	hr = pTask->Init(); */
-
-	CComObjectNoLock < CSimulatorPing >* pTask = new CComObjectNoLock < CSimulatorPing >;
-	pTask->Init();
+	hr = pTask->Init();
 }
