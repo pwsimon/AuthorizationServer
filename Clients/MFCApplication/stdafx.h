@@ -19,10 +19,7 @@
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 
-
 #include <afxdisp.h>        // MFC Automation classes
-
-
 
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // MFC support for Internet Explorer 4 Common Controls
@@ -32,14 +29,6 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
-
-
-
-
-
-
-
-
 
 #ifdef _UNICODE
 #if defined _M_IX86
@@ -51,4 +40,21 @@
 #endif
 #endif
 
+// needed to use "AuthrizationServer"
+// C++ REST SDK (Codename "Casablanca")
+//   NuGet Package, Version 2.7.0 (desktop), https://github.com/Microsoft/cpprestsdk
+//   most of the web payload is json encoded
+#include <cpprest/json.h>
 
+// all of our client clases are based on COM were using ATL to built COM classes
+#include <atlcom.h>
+
+// were using XMLHTTPRequest for network access
+#import <msxml4.dll> no_function_mapping
+
+// the "AuthrizationServer" itself
+#ifdef _DEBUG
+	#import "..\..\Debug\oAuth.tlb"
+#else
+	#import "..\..\Release\oAuth.tlb"
+#endif

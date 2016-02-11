@@ -1,4 +1,3 @@
-
 // MFCApplicationDlg.cpp : implementation file
 //
 
@@ -6,14 +5,13 @@
 #include "MFCApplication.h"
 #include "MFCApplicationDlg.h"
 #include "afxdialogex.h"
+#include "SimulatorService.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
 // CAboutDlg dialog used for App About
-
 class CAboutDlg : public CDialogEx
 {
 public:
@@ -30,6 +28,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+END_MESSAGE_MAP()
+
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
 {
 }
@@ -39,14 +40,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-END_MESSAGE_MAP()
-
-
 // CMFCApplicationDlg dialog
-
-
-
 CMFCApplicationDlg::CMFCApplicationDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CMFCApplicationDlg::IDD, pParent)
 {
@@ -58,15 +52,16 @@ void CMFCApplicationDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 }
 
+
+
 BEGIN_MESSAGE_MAP(CMFCApplicationDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_RUNPING, &CMFCApplicationDlg::OnBnClickedRunping)
 END_MESSAGE_MAP()
 
-
 // CMFCApplicationDlg message handlers
-
 BOOL CMFCApplicationDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -96,8 +91,6 @@ BOOL CMFCApplicationDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	// TODO: Add extra initialization here
-
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -117,7 +110,6 @@ void CMFCApplicationDlg::OnSysCommand(UINT nID, LPARAM lParam)
 // If you add a minimize button to your dialog, you will need the code below
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
-
 void CMFCApplicationDlg::OnPaint()
 {
 	if (IsIconic())
@@ -150,3 +142,13 @@ HCURSOR CMFCApplicationDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void CMFCApplicationDlg::OnBnClickedRunping()
+{
+	/* needs ATL Module
+	CComObject < CSimulatorPing >* pTask = NULL;
+	HRESULT hr = CComObject < CSimulatorPing >::CreateInstance(&pTask);
+	hr = pTask->Init(); */
+
+	CComObjectNoLock < CSimulatorPing >* pTask = new CComObjectNoLock < CSimulatorPing >;
+	pTask->Init();
+}

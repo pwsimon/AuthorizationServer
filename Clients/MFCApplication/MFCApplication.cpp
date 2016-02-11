@@ -1,4 +1,3 @@
-
 // MFCApplication.cpp : Defines the class behaviors for the application.
 //
 
@@ -10,16 +9,15 @@
 #define new DEBUG_NEW
 #endif
 
+// The one and only CMFCApplicationApp object
+CMFCApplicationApp theApp;
 
 // CMFCApplicationApp
-
 BEGIN_MESSAGE_MAP(CMFCApplicationApp, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
-
 // CMFCApplicationApp construction
-
 CMFCApplicationApp::CMFCApplicationApp()
 {
 	// support Restart Manager
@@ -29,14 +27,7 @@ CMFCApplicationApp::CMFCApplicationApp()
 	// Place all significant initialization in InitInstance
 }
 
-
-// The one and only CMFCApplicationApp object
-
-CMFCApplicationApp theApp;
-
-
 // CMFCApplicationApp initialization
-
 BOOL CMFCApplicationApp::InitInstance()
 {
 	// InitCommonControlsEx() is required on Windows XP if an application
@@ -99,4 +90,3 @@ BOOL CMFCApplicationApp::InitInstance()
 	//  application, rather than start the application's message pump.
 	return FALSE;
 }
-
