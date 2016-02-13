@@ -8,7 +8,6 @@
 #endif
 
 #include "resource.h"		// main symbols
-#include "MFCApplication_i.h"
 
 // CMFCApplicationApp:
 // See MFCApplication.cpp for the implementation of this class
@@ -21,7 +20,6 @@ public:
 // Overrides
 public:
 	virtual BOOL InitInstance();
-	BOOL ExitInstance();
 
 // Implementation
 	DECLARE_MESSAGE_MAP()

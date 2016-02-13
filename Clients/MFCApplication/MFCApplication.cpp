@@ -4,23 +4,10 @@
 #include "stdafx.h"
 #include "MFCApplication.h"
 #include "MFCApplicationDlg.h"
-#include <initguid.h>
-#include "MFCApplication_i.c"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-// The one and only CMFCApplicationApp object
-class CMFCApplicationModule :
-	public ATL::CAtlMfcModule
-{
-public:
-	DECLARE_LIBID(LIBID_MFCApplicationLib);
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_MFCAPPLICATION, "{7918C42D-7EF8-401F-9D6A-E0583D2B663F}");
-};
-
-CMFCApplicationModule _AtlModule;
 
 CMFCApplicationApp theApp;
 
@@ -43,6 +30,7 @@ CMFCApplicationApp::CMFCApplicationApp()
 BOOL CMFCApplicationApp::InitInstance()
 {
 	AfxOleInit();
+
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -56,39 +44,6 @@ BOOL CMFCApplicationApp::InitInstance()
 	CWinApp::InitInstance();
 
 	AfxEnableControlContainer();
-	// Parse command line for standard shell commands, DDE, file open
-	CCommandLineInfo cmdInfo;
-	ParseCommandLine(cmdInfo);
-
-#if !defined(_WIN32_WCE) || defined(_CE_DCOM)
-	// Register class factories via CoRegisterClassObject().
-	if (FAILED(_AtlModule.RegisterClassObjects(CLSCTX_LOCAL_SERVER, REGCLS_MULTIPLEUSE)))
-		return FALSE;
-#endif // !defined(_WIN32_WCE) || defined(_CE_DCOM)
-
-	// App was launched with /Embedding or /Automation switch.
-	// Run app as automation server.
-	if (cmdInfo.m_bRunEmbedded || cmdInfo.m_bRunAutomated)
-	{
-		// Don't show the main window
-		return TRUE;
-	}
-
-	// App was launched with /Unregserver or /Unregister switch.
-	if (cmdInfo.m_nShellCommand == CCommandLineInfo::AppUnregister)
-	{
-		_AtlModule.UpdateRegistryAppId(FALSE);
-		_AtlModule.UnregisterServer(TRUE);
-		return FALSE;
-	}
-
-	// App was launched with /Register or /Regserver switch.
-	if (cmdInfo.m_nShellCommand == CCommandLineInfo::AppRegister)
-	{
-		_AtlModule.UpdateRegistryAppId(TRUE);
-		_AtlModule.RegisterServer(TRUE);
-		return FALSE;
-	}
 
 	// Create the shell manager, in case the dialog contains
 	// any shell tree view or shell list view controls.
@@ -136,13 +91,4 @@ BOOL CMFCApplicationApp::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
-}
-
-BOOL CMFCApplicationApp::ExitInstance()
-{
-#if !defined(_WIN32_WCE) || defined(_CE_DCOM)
-	_AtlModule.RevokeClassObjects();
-#endif
-
-	return CWinApp::ExitInstance();
 }

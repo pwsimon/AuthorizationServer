@@ -144,7 +144,7 @@ HCURSOR CMFCApplicationDlg::OnQueryDragIcon()
 
 void CMFCApplicationDlg::OnBnClickedRunping()
 {
-	CComObject < CSimulatorPing >* pTask = NULL;
-	HRESULT hr = CComObject < CSimulatorPing >::CreateInstance(&pTask);
-	hr = pTask->Init();
+	CSimulatorPing* pSimulatorPing = DYNAMIC_DOWNCAST(CSimulatorPing, RUNTIME_CLASS(CSimulatorPing)->CreateObject());
+	pSimulatorPing->Init();
+	pSimulatorPing->ExternalRelease();
 }

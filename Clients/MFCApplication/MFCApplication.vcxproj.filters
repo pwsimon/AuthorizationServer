@@ -36,10 +36,13 @@
     <ClInclude Include="SimulatorService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\CallbackoAuth.h">
+    <ClInclude Include="..\IWorkflowWebImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\IWorkflowWebImpl.h">
+    <ClInclude Include="..\CoAuthServiceCall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CoAuthRenewTokenAsync.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,6 +59,12 @@
     <ClCompile Include="SimulatorService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\CoAuthServiceCall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CoAuthRenewTokenAsync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFCApplication.rc">
@@ -67,18 +76,10 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="MFCApplication.rgs">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MFCApplication.ico">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Midl Include="MFCApplication.idl">
-      <Filter>Source Files</Filter>
-    </Midl>
   </ItemGroup>
 </Project>
