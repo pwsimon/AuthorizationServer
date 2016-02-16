@@ -11,6 +11,10 @@ IMPLEMENT_DYNCREATE(CoAuthServiceCall, CCmdTarget)
 BEGIN_MESSAGE_MAP(CoAuthServiceCall, CCmdTarget)
 END_MESSAGE_MAP()
 
+BEGIN_INTERFACE_MAP(CoAuthServiceCall, CCmdTarget)
+	INTERFACE_PART(CoAuthServiceCall, __uuidof(oAuthLib::IRenewCallback), RenewCallback)
+END_INTERFACE_MAP()
+
 BEGIN_DISPATCH_MAP(CoAuthServiceCall, CCmdTarget)
 	DISP_FUNCTION_ID(CoAuthServiceCall, "OnReadyStateChange", 0, ReadyStateChange, VT_EMPTY, VTS_NONE)
 END_DISPATCH_MAP()
@@ -23,11 +27,11 @@ void CoAuthServiceCall::ReadyStateChange()
 	switch (m_spRequest->readyState) {
 	case READYSTATE_LOADING:
 	{
-		TRACE2("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_LOADING\n", (BSTR)m_bstrUrl, m_eState);
+		TRACE2("CoAuthServiceCall(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_LOADING\n", (BSTR)m_bstrUrl, m_eState);
 
 		/*
 		* siehe auch: kommentar zu
-		*   CCallbackoAuthImpl<T>::m_bstrAccessToken UND
+		*   CoAuthServiceCall::m_bstrAccessToken UND
 		*   IWorkflow::AuthorizeRequest
 		*/
 		oAuthLib::IAuthorizePtr spAuthorize;
@@ -37,7 +41,7 @@ void CoAuthServiceCall::ReadyStateChange()
 	break;
 	case READYSTATE_COMPLETE:
 	{
-		TRACE2("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_COMPLETE\n", (BSTR)m_bstrUrl, m_eState);
+		TRACE2("CoAuthServiceCall(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_COMPLETE\n", (BSTR)m_bstrUrl, m_eState);
 
 		/*
 		* das wird erst noetig wenn wir den UseCase: Shutdown, Wait for pending requests implementieren
@@ -76,11 +80,12 @@ void CoAuthServiceCall::ReadyStateChange()
 					*/
 
 					CoAuthRenewTokenAsync* pRenewTokenAsync = DYNAMIC_DOWNCAST(CoAuthRenewTokenAsync, RUNTIME_CLASS(CoAuthRenewTokenAsync)->CreateObject());
+					ASSERT(1 == pRenewTokenAsync->m_dwRef);
 					// dieses object kuemmert sich transparent und OHNE jegliches zutun des programmieres
 					// darum das es einen pThis->onSucceeded() bzw. pThis->onFailed(); gibt
 					// diese referenz MUSS VOR dem aufruf von ::Init() gelockt anschliessend freigegeben UND NICHT gespeichert werden!
-					IUnknownPtr spLock(pRenewTokenAsync->GetInterface(&__uuidof(IUnknown)));
-					// pRenewTokenAsync->Init(spAuthorize, pThis);
+					oAuthLib::IRenewCallbackPtr spCallback(GetInterface(&__uuidof(oAuthLib::IRenewCallback)));
+					pRenewTokenAsync->Init(spAuthorize, spCallback);
 					pRenewTokenAsync->ExternalRelease();
 				}
 				else
@@ -92,7 +97,8 @@ void CoAuthServiceCall::ReadyStateChange()
 					// wir loeschen das alte/unbrauchbare access_token aus dem initialen request
 					m_bstrAccessToken.Empty();
 					// mit IRenewCallback::Continue() wird der m_spRequest NEU initialisiert und indirekt ueber IWorkflow::AuthorizeRequest() wieder authorisiert.
-					Continue();
+					oAuthLib::IRenewCallbackPtr spCallback(GetInterface(&__uuidof(oAuthLib::IRenewCallback)));
+					spCallback->Continue();
 					// here we go: NEUES GUELTIGES access_token
 					ASSERT(0 < m_bstrAccessToken.Length());
 				}
@@ -132,30 +138,26 @@ CoAuthServiceCall::CoAuthServiceCall()
 	__super::EnableAutomation();
 }
 
-CoAuthServiceCall::~CoAuthServiceCall()
-{
-}
-
 void CoAuthServiceCall::OnFinalRelease()
 {
 	TRACE0("CoAuthServiceCall::OnFinalRelease()\n");
 	CCmdTarget::OnFinalRelease();
 }
 
-// CoAuthServiceCall message handlers
-HRESULT CoAuthServiceCall::Init(BSTR bstrUrl)
+// C/C++ Interface
+HRESULT CoAuthServiceCall::Init(LPCTSTR szMethod, LPCTSTR szUrl)
 {
 	_ASSERT(NULL == m_spRequest); // initalize only once
 	m_spRequest.CreateInstance(__uuidof(MSXML2::XMLHTTP40));
 
 	// add sink to xml http request
-	HRESULT hr = m_spRequest->put_onreadystatechange(GetIDispatch(TRUE));
+	HRESULT hr = m_spRequest->put_onreadystatechange(GetIDispatch(FALSE));
 	_ASSERT(SUCCEEDED(hr));
 
 	m_eState = InitialRequest;
-	m_bstrMethod = "GET"; // bstrMethod;
-	m_bstrUrl = bstrUrl;
-	TRACE2("  %ls: %ls (first trial)\n", (BSTR)m_bstrMethod, (BSTR)m_bstrUrl);
+	m_bstrMethod = szMethod;
+	m_bstrUrl = szUrl;
+	TRACE2("  %s: %s (first trial)\n", szMethod, szUrl);
 
 	/*
 	* hier laeuft schon der erste (synchrone) Callback (OnReadStateChange(READYSTATE_LOADING))
@@ -168,4 +170,29 @@ HRESULT CoAuthServiceCall::Init(BSTR bstrUrl)
 }
 
 // IRenewCallback implementation
-// METHOD_PROLOGUE(CoAuthServiceCall, IRenewCallback);
+DELEGATE_IUNK_INTERFACE(CoAuthServiceCall, RenewCallback)
+STDMETHODIMP CoAuthServiceCall::XRenewCallback::raw_Continue()
+{
+	METHOD_PROLOGUE(CoAuthServiceCall, RenewCallback)
+
+	HRESULT hr = E_FAIL;
+	pThis->m_eState = RetryOnce;
+	try {
+		ATLTRACE2(atlTraceGeneral, 0, _T("  %ls: %ls (retry once)\n"), (BSTR)pThis->m_bstrMethod, (BSTR)pThis->m_bstrUrl);
+		pThis->m_spRequest->open(pThis->m_bstrMethod, pThis->m_bstrUrl, VARIANT_TRUE); // hier laeuft schon der erste (synchrone) Callback (OnReadStateChange(READYSTATE_LOADING))
+		pThis->m_spRequest->send();
+		hr = E_PENDING;
+	}
+	catch (const _com_error& e) {
+		hr = e.Error();
+	}
+	return hr;
+}
+
+STDMETHODIMP CoAuthServiceCall::XRenewCallback::raw_Terminate()
+{
+	METHOD_PROLOGUE(CoAuthServiceCall, RenewCallback)
+
+	pThis->m_eState = Finish;
+	return NOERROR;
+}

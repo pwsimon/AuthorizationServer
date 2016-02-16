@@ -16,10 +16,12 @@ public:
 class CSimulatorPing : public CoAuthServiceCall
 {
 public:
-	HRESULT Init();
-	DECLARE_DYNCREATE(CSimulatorPing)
+	HRESULT Init(LPCTSTR szClientId);
 
 	// overrides
 protected:
-	/*virtual*/ HRESULT GetTokenServer(oAuthLib::IAuthorize**);
+	/*virtual*/ HRESULT GetTokenServer(oAuthLib::IAuthorize** ppAuthorize);
+	/*virtual*/ void onSucceeded(web::json::value& result);
+
+	DECLARE_DYNCREATE(CSimulatorPing)
 };

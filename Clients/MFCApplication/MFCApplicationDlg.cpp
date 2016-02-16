@@ -145,6 +145,7 @@ HCURSOR CMFCApplicationDlg::OnQueryDragIcon()
 void CMFCApplicationDlg::OnBnClickedRunping()
 {
 	CSimulatorPing* pSimulatorPing = DYNAMIC_DOWNCAST(CSimulatorPing, RUNTIME_CLASS(CSimulatorPing)->CreateObject());
-	pSimulatorPing->Init();
+	ASSERT(1 == pSimulatorPing->m_dwRef); // MFC Standard
+	pSimulatorPing->Init(_T("SimulatorClientId"));
 	pSimulatorPing->ExternalRelease();
 }

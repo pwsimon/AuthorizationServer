@@ -1,9 +1,7 @@
-
 // MFCApplicationDlg.h : header file
 //
 
 #pragma once
-
 
 // CMFCApplicationDlg dialog
 class CMFCApplicationDlg : public CDialogEx
@@ -17,7 +15,6 @@ public:
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-
 
 // Implementation
 protected:

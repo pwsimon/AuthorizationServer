@@ -1,5 +1,23 @@
 #pragma once
 
+#define DELEGATE_IUNK_INTERFACE(objectClass, dualClass) \
+	STDMETHODIMP_(ULONG) objectClass::X##dualClass::AddRef() \
+		{ \
+		METHOD_PROLOGUE(objectClass, dualClass) \
+		return pThis->ExternalAddRef(); \
+		} \
+	STDMETHODIMP_(ULONG) objectClass::X##dualClass::Release() \
+		{ \
+		METHOD_PROLOGUE(objectClass, dualClass) \
+		return pThis->ExternalRelease(); \
+		} \
+	STDMETHODIMP objectClass::X##dualClass::QueryInterface( \
+		REFIID iid, LPVOID* ppvObj) \
+		{ \
+		METHOD_PROLOGUE(objectClass, dualClass) \
+		return pThis->ExternalQueryInterface(&iid, ppvObj); \
+		}
+
 /*
 * die idee an sich ist aus meiner sicht nicht so schlecht denn so koennte man auch den <company>/<product> speziellen pfad abhandeln.
 * machen wir z.b. mit dem Meta auch so
@@ -19,12 +37,20 @@
 // diese klasse ist die MFC Version der ATL klasse (CCallbackoAuthImpl < T >)
 class CoAuthServiceCall : public CCmdTarget
 {
+	friend class CoAuthRenewTokenAsync;
+
 public:
 	CoAuthServiceCall();
-	virtual ~CoAuthServiceCall();
 	virtual void OnFinalRelease();
 
-	HRESULT Init(BSTR bstrUrl);
+	HRESULT Init(LPCTSTR szMethod, LPCTSTR szUrl);
+
+	// oAuthLib::IRenewCallback
+	BEGIN_INTERFACE_PART(RenewCallback, oAuthLib::IRenewCallback)
+		STDMETHOD(raw_Continue)();
+		STDMETHOD(raw_Terminate)();
+	END_INTERFACE_PART(RenewCallback)
+	DECLARE_INTERFACE_MAP()
 
 protected:
 	DECLARE_DYNCREATE(CoAuthServiceCall)
@@ -39,10 +65,6 @@ protected:
 	virtual HRESULT GetTokenServer(oAuthLib::IAuthorize**) { return E_NOTIMPL; }
 	virtual void onSucceeded(web::json::value& result) { }
 	virtual void onFailed() {}
-
-private:
-	void Continue() {}
-	void Terminate() {}
 
 	enum { InitialRequest, RetryOnce, Finish } m_eState;
 	_bstr_t m_bstrMethod;
