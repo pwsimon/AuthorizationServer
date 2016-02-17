@@ -21,7 +21,11 @@ public:
 	// overrides
 protected:
 	/*virtual*/ HRESULT GetTokenServer(oAuthLib::IAuthorize** ppAuthorize);
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
 	/*virtual*/ void onSucceeded(web::json::value& result);
+#else
+	/*virtual*/ void onSucceeded();
+#endif
 
 	DECLARE_DYNCREATE(CSimulatorPing)
 };

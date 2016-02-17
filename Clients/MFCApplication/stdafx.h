@@ -41,11 +41,16 @@
 #endif
 #endif
 
-// needed to use "AuthrizationServer"
-// C++ REST SDK (Codename "Casablanca")
-//   NuGet Package, Version 2.7.0 (desktop), https://github.com/Microsoft/cpprestsdk
-//   most of the web payload is json encoded
-#include <cpprest/json.h>
+// the following are needed to use "AuthorizationServer"
+#define AUTHORIZATION_SERVER_SUPPORT_JSON
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
+	// C++ REST SDK (Codename "Casablanca")
+	//   NuGet Package, Version 2.7.0 (desktop), https://github.com/Microsoft/cpprestsdk
+	//   most of the web payload is json encoded
+	// CAUTION: this is necessary to avoid false memory leaks reported by the MFC framework;
+	// http://codexpert.ro/blog/2015/05/23/using-lambdas-in-mfc-applications-part-3-dealing-with-c-rest-sdk/
+	#include <cpprest/json.h>
+#endif
 
 // were using XMLHTTPRequest for network access
 #import <msxml4.dll> no_function_mapping

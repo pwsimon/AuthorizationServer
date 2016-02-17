@@ -63,7 +63,11 @@ protected:
 	MSXML2::IXMLHTTPRequestPtr m_spRequest;
 
 	virtual HRESULT GetTokenServer(oAuthLib::IAuthorize**) { return E_NOTIMPL; }
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
 	virtual void onSucceeded(web::json::value& result) { }
+#else
+	virtual void onSucceeded() { }
+#endif
 	virtual void onFailed() {}
 
 	enum { InitialRequest, RetryOnce, Finish } m_eState;

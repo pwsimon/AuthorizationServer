@@ -51,7 +51,15 @@ HRESULT CSimulatorPing::Init(LPCTSTR szClientId)
 	return CSimulatorWf::GetTokenServerByDisplayName(strMonikerName, ppAuthorize);
 }
 
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
 /*virtual*/ void CSimulatorPing::onSucceeded(web::json::value& result)
 {
 	TRACE1("  result: %s\n", result[_T("result")].as_string().c_str());
 }
+#else
+/*virtual*/ void CSimulatorPing::onSucceeded()
+{
+	MSXML2::IXMLDOMDocument2Ptr spXML(m_spRequest->responseXML);
+	TRACE1("  result: %ls\n", (BSTR)spXML->xml);
+}
+#endif

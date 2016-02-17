@@ -54,10 +54,20 @@ void CoAuthServiceCall::ReadyStateChange()
 		{
 			m_eState = Finish;
 
-			// das ist natuerlich LUXUS pur bzw. schon zuviel spezialisierung. es gibt ja auch noch XML
-			// https://casablanca.codeplex.com/wikipage?title=JSON&referringTitle=Documentation
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
+/*
+* das ist natuerlich LUXUS pur bzw. schon zuviel spezialisierung. es gibt ja auch noch XML
+* https://casablanca.codeplex.com/wikipage?title=JSON&referringTitle=Documentation
+*
+* CAUTION: this is necessary to avoid false memory leaks reported by the MFC framework;
+* http://codexpert.ro/blog/2015/05/23/using-lambdas-in-mfc-applications-part-3-dealing-with-c-rest-sdk/
+*/
 			web::json::value result = web::json::value::parse(utility::string_t(m_spRequest->responseText));
 			onSucceeded(result); // wir setzen das onSucceeded NICHT in abhaengigkeit vom m_spRequest->status
+#else
+
+			onSucceeded(); // wir setzen das onSucceeded NICHT in abhaengigkeit vom m_spRequest->status
+#endif
 
 			// break reference cycle
 			// Remove sink from xml http request, hier faellt evtl. die letzte referenz
