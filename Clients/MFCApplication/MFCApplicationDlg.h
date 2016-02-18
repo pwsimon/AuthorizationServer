@@ -19,11 +19,16 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
+	typedef std::list < CCmdTarget* > LIST_CMDS;
+	LIST_CMDS m_lstCmd;
+
+	CTypedPtrList < CObList, CCmdTarget* > m_tpl;
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnBnClickedRunping();
 

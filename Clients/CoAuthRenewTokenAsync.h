@@ -10,6 +10,9 @@ public:
 	virtual void OnFinalRelease();
 	HRESULT Init(oAuthLib::IAuthorize* pAuthorize, oAuthLib::IRenewCallback* pRenewCallback);
 
+// attributes
+	MSXML2::IXMLHTTPRequestPtr m_spRequest;
+
 protected:
 	DECLARE_DYNCREATE(CoAuthRenewTokenAsync)
 	DECLARE_MESSAGE_MAP()
@@ -20,5 +23,4 @@ protected:
 private:
 	oAuthLib::IAuthorizePtr m_spAuthorize;
 	oAuthLib::IRenewCallbackPtr m_spRenewCallback;
-	MSXML2::IXMLHTTPRequestPtr m_spRequest;
 };

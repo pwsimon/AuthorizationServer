@@ -18,7 +18,7 @@ END_DISPATCH_MAP()
 // IDispatch implementation
 void CoAuthRenewTokenAsync::ReadyStateChange()
 {
-	InternalAddRef(); // lock protect your instance
+	ExternalAddRef(); // lock protect your instance
 	try
 	{
 		TRACE1("CoAuthRenewTokenAsync::IXMLDOMDocumentEvents::OnReadyStateChange() readyState: 0x%.8x\n", m_spRequest->readyState);
@@ -42,9 +42,9 @@ void CoAuthRenewTokenAsync::ReadyStateChange()
 			HRESULT hr = m_spAuthorize->raw_UnLockFromRenew();
 			_ASSERT(SUCCEEDED(hr));
 
-			// break reference cycle
-			// Remove sink from xml http request
-			m_spRequest->put_onreadystatechange(NULL);
+			// break reference cycle, Remove sink from xml http request
+			// CAUTION: this wont work for this implementation MFC/DISPATCH (Heap corrupt)
+			// m_spRequest->put_onreadystatechange(NULL);
 
 			if (SUCCEEDED(hr))
 			{
@@ -72,7 +72,7 @@ void CoAuthRenewTokenAsync::ReadyStateChange()
 		HRESULT hr = e.Error();
 	}
 
-	InternalRelease(); // unlock instance, may the last one
+	ExternalRelease(); // unlock instance, may the last one
 }
 
 CoAuthRenewTokenAsync::CoAuthRenewTokenAsync()

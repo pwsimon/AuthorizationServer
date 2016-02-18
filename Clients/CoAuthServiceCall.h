@@ -40,10 +40,14 @@ class CoAuthServiceCall : public CCmdTarget
 	friend class CoAuthRenewTokenAsync;
 
 public:
+	enum _state { InitialRequest, RetryOnce, Finish };
+
 	CoAuthServiceCall();
 	virtual void OnFinalRelease();
 
 	HRESULT Init(LPCTSTR szMethod, LPCTSTR szUrl);
+	enum _state GetState() { return m_eState; }
+	HRESULT Dispose();
 
 	// oAuthLib::IRenewCallback
 	BEGIN_INTERFACE_PART(RenewCallback, oAuthLib::IRenewCallback)
@@ -61,6 +65,7 @@ protected:
 
 protected:
 	MSXML2::IXMLHTTPRequestPtr m_spRequest;
+	CoAuthRenewTokenAsync* m_pRenewTokenAsync;
 
 	virtual HRESULT GetTokenServer(oAuthLib::IAuthorize**) { return E_NOTIMPL; }
 #ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
@@ -68,9 +73,11 @@ protected:
 #else
 	virtual void onSucceeded() { }
 #endif
-	virtual void onFailed() {}
+	virtual void onFailed() {
+		TRACE2("  HTTP Status: 0x%.8x, %ls\n", m_spRequest->status, m_spRequest->statusText);
+	}
 
-	enum { InitialRequest, RetryOnce, Finish } m_eState;
+	enum _state m_eState;
 	_bstr_t m_bstrMethod;
 	_bstr_t m_bstrUrl;
 

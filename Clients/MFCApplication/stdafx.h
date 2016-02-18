@@ -30,6 +30,7 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
+#include <list>
 
 #ifdef _UNICODE
 #if defined _M_IX86

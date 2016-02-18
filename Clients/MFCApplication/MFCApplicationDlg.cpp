@@ -58,6 +58,7 @@ BEGIN_MESSAGE_MAP(CMFCApplicationDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_RUNPING, &CMFCApplicationDlg::OnBnClickedRunping)
 END_MESSAGE_MAP()
 
@@ -88,10 +89,12 @@ BOOL CMFCApplicationDlg::OnInitDialog()
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
+	SetIcon(m_hIcon, TRUE); // Set big icon
+	SetIcon(m_hIcon, FALSE); // Set small icon
 
-	return TRUE;  // return TRUE  unless you set the focus to a control
+	SetTimer(0, 5000, NULL);
+
+	return TRUE; // return TRUE  unless you set the focus to a control
 }
 
 void CMFCApplicationDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -147,5 +150,24 @@ void CMFCApplicationDlg::OnBnClickedRunping()
 	CSimulatorPing* pSimulatorPing = DYNAMIC_DOWNCAST(CSimulatorPing, RUNTIME_CLASS(CSimulatorPing)->CreateObject());
 	ASSERT(1 == pSimulatorPing->m_dwRef); // MFC Standard
 	pSimulatorPing->Init(_T("SimulatorClientId"));
-	pSimulatorPing->ExternalRelease();
+	m_lstCmd.push_back(pSimulatorPing);
+}
+
+void CMFCApplicationDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	if (m_lstCmd.size())
+	{
+		CSimulatorPing* pCmd = DYNAMIC_DOWNCAST(CSimulatorPing, m_lstCmd.front());
+		if (NULL != pCmd)
+		{
+			if (CoAuthServiceCall::Finish == pCmd->GetState())
+			{
+				pCmd->Dispose();
+				pCmd->ExternalRelease();
+				m_lstCmd.pop_front();
+			}
+		}
+	}
+
+	CDialogEx::OnTimer(nIDEvent);
 }
