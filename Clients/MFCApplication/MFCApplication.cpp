@@ -29,6 +29,8 @@ CMFCApplicationApp::CMFCApplicationApp()
 // CMFCApplicationApp initialization
 BOOL CMFCApplicationApp::InitInstance()
 {
+	AfxOleInit();
+
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -89,4 +91,11 @@ BOOL CMFCApplicationApp::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
+}
+
+int CMFCApplicationApp::ExitInstance()
+{
+	const int iRetC =  CWinApp::ExitInstance();
+	AfxOleTerm();
+	return iRetC;
 }

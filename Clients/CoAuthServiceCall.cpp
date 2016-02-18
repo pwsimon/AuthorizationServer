@@ -22,7 +22,7 @@ END_DISPATCH_MAP()
 // IDispatch implementation
 void CoAuthServiceCall::ReadyStateChange()
 {
-	InternalAddRef(); // lock protect your instance
+	const DWORD dwRef = ExternalAddRef(); // lock protect your instance
 
 	switch (m_spRequest->readyState) {
 	case READYSTATE_LOADING:
@@ -91,12 +91,25 @@ void CoAuthServiceCall::ReadyStateChange()
 
 					CoAuthRenewTokenAsync* pRenewTokenAsync = DYNAMIC_DOWNCAST(CoAuthRenewTokenAsync, RUNTIME_CLASS(CoAuthRenewTokenAsync)->CreateObject());
 					ASSERT(1 == pRenewTokenAsync->m_dwRef);
-					// dieses object kuemmert sich transparent und OHNE jegliches zutun des programmieres
-					// darum das es einen pThis->onSucceeded() bzw. pThis->onFailed(); gibt
-					// diese referenz MUSS VOR dem aufruf von ::Init() gelockt anschliessend freigegeben UND NICHT gespeichert werden!
-					oAuthLib::IRenewCallbackPtr spCallback(GetInterface(&__uuidof(oAuthLib::IRenewCallback)));
-					pRenewTokenAsync->Init(spAuthorize, spCallback);
-					pRenewTokenAsync->ExternalRelease();
+/*
+* dieses object kuemmert sich transparent und OHNE jegliches zutun des programmieres
+* darum das es einen pThis->onSucceeded() bzw. pThis->onFailed(); gibt
+* diese referenz MUSS VOR dem aufruf von ::Init() gelockt anschliessend freigegeben UND NICHT gespeichert werden!
+* Hinweis: ein per CRunntimeClass::CreateObject()) erzeugtes object hat initial 1 == CCmdTarget::m_dwRef
+*/
+					{
+						oAuthLib::IRenewCallbackPtr spCallback(GetInterface(&__uuidof(oAuthLib::IRenewCallback)));
+						ASSERT(CCmdTarget::m_dwRef == dwRef + 1);
+						pRenewTokenAsync->Init(spAuthorize, spCallback);
+						ASSERT(CCmdTarget::m_dwRef == dwRef + 2);
+#ifdef _DEBUG
+						if (pRenewTokenAsync->ExternalRelease())
+							TRACE0("CoAuthRenewTokenAsync call pending\n");
+#else
+
+						pRenewTokenAsync->ExternalRelease();
+#endif
+					}
 				}
 				else
 				{
@@ -140,7 +153,7 @@ void CoAuthServiceCall::ReadyStateChange()
 		TRACE2("  logical state: %d, m_spRequest->readyState: %d\n", m_eState, m_spRequest->readyState);
 		break;
 	}
-	InternalRelease(); // unlock your instance
+	ExternalRelease(); // unlock your instance
 }
 
 CoAuthServiceCall::CoAuthServiceCall()
@@ -161,8 +174,9 @@ HRESULT CoAuthServiceCall::Init(LPCTSTR szMethod, LPCTSTR szUrl)
 	m_spRequest.CreateInstance(__uuidof(MSXML2::XMLHTTP40));
 
 	// add sink to xml http request
+	const DWORD dwRef = CCmdTarget::m_dwRef;
 	HRESULT hr = m_spRequest->put_onreadystatechange(GetIDispatch(FALSE));
-	_ASSERT(SUCCEEDED(hr));
+	_ASSERT(SUCCEEDED(hr) && (dwRef + 1 == CCmdTarget::m_dwRef));
 
 	m_eState = InitialRequest;
 	m_bstrMethod = szMethod;
@@ -174,9 +188,17 @@ HRESULT CoAuthServiceCall::Init(LPCTSTR szMethod, LPCTSTR szUrl)
 	* ungluecklicherweise koennen wir fuer den fall das der IWorkflow::AuthorizeRequest() failed KEINEN returnwert/exception liefern
 	* ergo wird das IXMLHTTPRequest::send() unbedingt nachgeschoben. das heist wir muessen spaeter evtl. auf den falschen fehler 401 reagieren.
 	*/
-	m_spRequest->open(m_bstrMethod, m_bstrUrl, VARIANT_TRUE);
+	CComVariant varAsync(VARIANT_TRUE);
+	m_spRequest->open(m_bstrMethod, m_bstrUrl, varAsync);
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
+	m_spRequest->setRequestHeader(L"Accept", L"application/json");
+	// m_spRequest->setRequestHeader(L"Accept", L"application/json,application/xml");
+#else
+
+	m_spRequest->setRequestHeader(L"Accept", L"application/xml");
+#endif
 	m_spRequest->send();
-	return E_PENDING;
+	return VARIANT_TRUE == V_BOOL(&varAsync) ? E_PENDING : NOERROR;
 }
 
 // IRenewCallback implementation

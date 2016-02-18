@@ -60,6 +60,6 @@ HRESULT CSimulatorPing::Init(LPCTSTR szClientId)
 /*virtual*/ void CSimulatorPing::onSucceeded()
 {
 	MSXML2::IXMLDOMDocument2Ptr spXML(m_spRequest->responseXML);
-	TRACE1("  result: %ls\n", (BSTR)spXML->xml);
+	TRACE1("  result: %ls\n", (BSTR)spXML->documentElement->xml);
 }
 #endif

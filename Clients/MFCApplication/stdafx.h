@@ -42,7 +42,7 @@
 #endif
 
 // the following are needed to use "AuthorizationServer"
-#define AUTHORIZATION_SERVER_SUPPORT_JSON
+// #define AUTHORIZATION_SERVER_SUPPORT_JSON
 #ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
 	// C++ REST SDK (Codename "Casablanca")
 	//   NuGet Package, Version 2.7.0 (desktop), https://github.com/Microsoft/cpprestsdk
