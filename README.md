@@ -18,7 +18,7 @@ i start publishing very early to train/learn how to develop with GitHub.
 RoadMap:
 - [X] ready to run Server component
 - [ ] library for easy Client development
-- [ ] public/online simulator (fake) Service API for quick and easy demo
+- [ ] public/cloud simulator (fake) Service API for quick and easy demo
 - [ ] ready to run sample (oacurl) for quick and easy demo
 - [ ] tool to perfom UserConsent on real Service APIs
 - [ ] redistributable package (.msi merge module)
@@ -26,7 +26,7 @@ RoadMap:
 
 ## Server component
 this ATL EXE Server component is the one and only controller (single point of control) for the TokenResponse-user file.
-the component is build as dll server and configured for instatiation by default surrogate DllHost.exe.
+the component is build as dll server and configured for instantiation by default surrogate DllHost.exe.
 in combination with a FileMoniker the COM Runtime ensure that there is at most one instance in absence of custom code.
 
 ## client library
