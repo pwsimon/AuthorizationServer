@@ -176,7 +176,7 @@ public:
 * Hinweise:
 * Methoden aus dem C/C++ interface sind im gegensatz zu COM interface "relativ" frei in wahl ob sie exception werfen oder nicht
 */
-	HRESULT Init(BSTR bstrUrl) {
+	HRESULT Init(LPCTSTR szMethod, LPCTSTR szUrl) {
 		_ASSERT(NULL == m_spRequest); // initalize only once
 		m_spRequest.CreateInstance(__uuidof(MSXML2::XMLHTTP40));
 
@@ -187,8 +187,8 @@ public:
 		_ASSERT(SUCCEEDED(hr));
 
 		m_eState = InitialRequest;
-		m_bstrMethod = "GET"; // bstrMethod;
-		m_bstrUrl = bstrUrl;
+		m_bstrMethod = szMethod;
+		m_bstrUrl = szUrl;
 		ATLTRACE2(atlTraceGeneral, 0, _T("  %ls: %ls (first trial)\n"), (BSTR)m_bstrMethod, (BSTR)m_bstrUrl);
 
 /*
@@ -196,9 +196,17 @@ public:
 * ungluecklicherweise koennen wir fuer den fall das der IWorkflow::AuthorizeRequest() failed KEINEN returnwert/exception liefern
 * ergo wird das IXMLHTTPRequest::send() unbedingt nachgeschoben. das heist wir muessen spaeter evtl. auf den falschen fehler 401 reagieren.
 */
-		m_spRequest->open(m_bstrMethod, m_bstrUrl, VARIANT_TRUE);
+		CComVariant varAsync(VARIANT_TRUE);
+		m_spRequest->open(m_bstrMethod, m_bstrUrl, varAsync);
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
+		m_spRequest->setRequestHeader(L"Accept", L"application/json");
+		// m_spRequest->setRequestHeader(L"Accept", L"application/json,application/xml");
+#else
+
+		m_spRequest->setRequestHeader(L"Accept", L"application/xml");
+#endif
 		m_spRequest->send();
-		return E_PENDING;
+		return VARIANT_TRUE == V_BOOL(&varAsync) ? E_PENDING : NOERROR;
 	}
 
 /*
@@ -217,6 +225,13 @@ public:
 		try {
 			ATLTRACE2(atlTraceGeneral, 0, _T("  %ls: %ls (retry once)\n"), (BSTR)m_bstrMethod, (BSTR)m_bstrUrl);
 			m_spRequest->open(m_bstrMethod, m_bstrUrl, VARIANT_TRUE); // hier laeuft schon der erste (synchrone) Callback (OnReadStateChange(READYSTATE_LOADING))
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
+			m_spRequest->setRequestHeader(L"Accept", L"application/json");
+			// m_spRequest->setRequestHeader(L"Accept", L"application/json,application/xml");
+#else
+
+			m_spRequest->setRequestHeader(L"Accept", L"application/xml");
+#endif
 			m_spRequest->send();
 			hr = E_PENDING;
 		}
@@ -270,10 +285,14 @@ public:
 					{
 						m_eState = Finish;
 
+#ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
 						// das ist natuerlich LUXUS pur bzw. schon zuviel spezialisierung. es gibt ja auch noch XML
 						// https://casablanca.codeplex.com/wikipage?title=JSON&referringTitle=Documentation
 						web::json::value result = web::json::value::parse(utility::string_t(m_spRequest->responseText));
 						pThis->onSucceeded(result); // wir setzen das onSucceeded NICHT in abhaengigkeit vom m_spRequest->status
+#else
+						pThis->onSucceeded();
+#endif
 
 						// break reference cycle
 						// Remove sink from xml http request, hier faellt evtl. die letzte referenz

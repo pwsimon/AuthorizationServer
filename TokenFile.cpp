@@ -278,7 +278,7 @@ STDMETHODIMP CTokenFile::UnLockFromRenew(void)
 	{
 		// authorisation failed
 		// 400 der zugriff wurde vom user EXPLIZIT gecanceled!
-		// wir muessen das "<APIPrefix>.Apis.Auth.OAuth2.Responses.TokenResponse-user" loeschen. der ConsentWorkflow MUSS erneut durchgefuehrt werden 
+		// wir muessen das "client_secrect_<ClientId>.TokenResponse-user" loeschen. der ConsentWorkflow MUSS erneut durchgefuehrt werden 
 		ATLTRACE2(atlTraceRefcount, 0, _T("  CRenewTokenAsync::IXMLDOMDocumentEvents::UnLockFromRenew() User canceled Token! perform ConsentWorkflow again\n"));
 
 		/*

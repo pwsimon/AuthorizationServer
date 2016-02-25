@@ -3,15 +3,6 @@
 #pragma once
 
 /*
-* das hier verwendete namensschema ist aktuell ausreichend, nachbesserung ist folgenden faellen evtl. noetig!
-* - wir nutzen mehrere dienste eines ServiceProvider. (wir ersetzten den <ServiceNamen> durch <client_ID>)
-* - ZWEI ServiceProvider bieten identische dienste an bzw. generieren identische client_IDs.
-*     wir bilden den ServiceNamen aus der URI des ServiceProvider UND der client_id
-*/
-#define TOKEN_RESPONSE_USER_FMT		_T("client_secret_%s.TokenResponse-user")
-#define CLIENT_SECRET_FMT			_T("client_secret_%s.json")
-
-/*
 * die idee an sich ist aus meiner sicht nicht so schlecht denn so koennte man auch den <company>/<product> speziellen pfad abhandeln.
 * machen wir z.b. mit dem Meta auch so
 *   ::SetEnvironmentVariable(_T("cticlientlocalappdata"), theServerSettings.GetCtiClientApplicationLocalDirectory().c_str());

@@ -74,7 +74,7 @@ protected:
 	virtual void onSucceeded() { }
 #endif
 	virtual void onFailed() {
-		TRACE2("  HTTP Status: 0x%.8x, %ls\n", m_spRequest->status, m_spRequest->statusText);
+		TRACE2("  HTTP Status: 0x%d, %ls\n", m_spRequest->status, (BSTR)m_spRequest->statusText);
 	}
 
 	enum _state m_eState;

@@ -17,9 +17,9 @@ this project is currently under construction (Version < 1)
 i start publishing very early to train/learn how to develop with GitHub.
 RoadMap:
 - [X] ready to run Server component
-- [ ] library for easy Client development
-- [ ] public/cloud simulator (fake) Service API for quick and easy demo
-- [ ] ready to run sample (oacurl) for quick and easy demo
+- [X] library for easy Client development
+- [X] public/cloud [simulator](http://simulatorauthserver.appspot.com/) Service API for quick and easy demo
+- [X] ready to run sample (WTL/MFC) for quick and easy demo
 - [ ] tool to perfom UserConsent on real Service APIs
 - [ ] redistributable package (.msi merge module)
 - [ ] installer package
@@ -29,16 +29,23 @@ this ATL EXE Server component is the one and only controller (single point of co
 the component is build as dll server and configured for instantiation by default surrogate DllHost.exe.
 in combination with a FileMoniker the COM Runtime ensure that there is at most one instance in absence of custom code.
 
-## client library
+## client libraries
 the different client libraries brings the capability of detecting expired tokens and the capability to repeat API requests.
+
+### ATL
+this client library simply consists of some template classes and is shipped as a set of .h files.
 
 ### MFC
 this client library simply consists of some base classes.
 this classes are shipped as .cpp and .h files not packaged as library.
 you have to copy these classes into your project.
 
-### ATL
-this client library simply consists of some template classes and is shipped as a set of .h files.
+## ready to run sample(s)
+with this Application(s) and the public/cloud service you get a quick start.
+i suggest to start with the WTL sample wich is the most intuitive sample.
 
-### ready to run sample
-with this Application and the public/cloud service you get a quick start.
+### WTL
+this Application is based on ATL and therefore designed to work with template classes.
+
+### MFC
+this Application is based on MFC only and has no other requirements.

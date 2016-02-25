@@ -42,7 +42,7 @@ IMPLEMENT_DYNCREATE(CSimulatorPing, CoAuthServiceCall)
 
 HRESULT CSimulatorPing::Init(LPCTSTR szClientId)
 {
-	return __super::Init(_T("GET"), _T("http://ws-psi-win8.estos.de/procallsdk/solution/teamviewer/tvsimulator/ping.asp"));
+	return __super::Init(_T("GET"), _T("http://simulatorauthserver.appspot.com/ping"));
 }
 
 /*virtual*/ HRESULT CSimulatorPing::GetTokenServer(oAuthLib::IAuthorize** ppAuthorize)
