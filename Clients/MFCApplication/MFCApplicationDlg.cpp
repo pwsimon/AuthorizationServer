@@ -8,8 +8,10 @@
 #include "SimulatorService.h"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
+	#define new DEBUG_NEW
 #endif
+#define TIMER_GARBAGE 0
+#define TIMER_STRESS  1
 
 // CAboutDlg dialog used for App About
 class CAboutDlg : public CDialogEx
@@ -50,6 +52,7 @@ CMFCApplicationDlg::CMFCApplicationDlg(CWnd* pParent /*=NULL*/)
 void CMFCApplicationDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_STRESSTIMER, m_sldrStressTimer);
 }
 
 
@@ -59,6 +62,7 @@ BEGIN_MESSAGE_MAP(CMFCApplicationDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_TIMER()
+	ON_WM_HSCROLL()
 	ON_BN_CLICKED(IDC_RUNPING, &CMFCApplicationDlg::OnBnClickedRunping)
 END_MESSAGE_MAP()
 
@@ -92,8 +96,9 @@ BOOL CMFCApplicationDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE); // Set big icon
 	SetIcon(m_hIcon, FALSE); // Set small icon
 
-	SetTimer(0, 5000, NULL);
-
+	SetTimer(TIMER_GARBAGE, 5000, NULL);
+	m_sldrStressTimer.SetRange(0, 5);
+	m_TimerStressPos = 0;
 	return TRUE; // return TRUE  unless you set the focus to a control
 }
 
@@ -104,6 +109,18 @@ void CMFCApplicationDlg::OnSysCommand(UINT nID, LPARAM lParam)
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
 	}
+
+	if (0 < (nID & SC_CLOSE))
+	{
+		if (0 < m_lstCmd.size())
+		{
+			// if pending commands. SC_CLOSE will be ignored
+			ATLTRACE2(atlTraceGeneral, 0, _T("SC_CLOSE will be ignored\n"));
+		}
+		else
+			CDialogEx::OnSysCommand(nID, lParam);
+	}
+
 	else
 	{
 		CDialogEx::OnSysCommand(nID, lParam);
@@ -147,27 +164,107 @@ HCURSOR CMFCApplicationDlg::OnQueryDragIcon()
 
 void CMFCApplicationDlg::OnBnClickedRunping()
 {
+/*
+* the following TWO simple lines are the core of this sample
+* create a request and execute them.
+
+* all of the other stuff is only to perform garbage collection, repeat requests frequently, ...
+*/
 	CSimulatorPing* pSimulatorPing = DYNAMIC_DOWNCAST(CSimulatorPing, RUNTIME_CLASS(CSimulatorPing)->CreateObject());
 	ASSERT(1 == pSimulatorPing->m_dwRef); // MFC Standard
 	pSimulatorPing->Init(_T("SimulatorClientId"));
+
 	m_lstCmd.push_back(pSimulatorPing);
 }
 
 void CMFCApplicationDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	if (m_lstCmd.size())
+	switch (nIDEvent)
 	{
-		CSimulatorPing* pCmd = DYNAMIC_DOWNCAST(CSimulatorPing, m_lstCmd.front());
-		if (NULL != pCmd)
+		case TIMER_GARBAGE:
 		{
-			if (CoAuthServiceCall::Finish == pCmd->GetState())
+			if (m_lstCmd.size())
 			{
-				pCmd->Dispose();
-				pCmd->ExternalRelease();
-				m_lstCmd.pop_front();
+				CSimulatorPing* pCmd = DYNAMIC_DOWNCAST(CSimulatorPing, m_lstCmd.front());
+				if (NULL != pCmd)
+				{
+					if (CoAuthServiceCall::Finish == pCmd->GetState())
+					{
+						pCmd->Dispose();
+						pCmd->ExternalRelease();
+						m_lstCmd.pop_front();
+					}
+				}
 			}
 		}
+		break;
+
+		case TIMER_STRESS:
+			OnBnClickedRunping();
+			break;
 	}
 
 	CDialogEx::OnTimer(nIDEvent);
+}
+
+void CMFCApplicationDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// Get the minimum and maximum scroll-bar positions.
+	int minpos = 0;
+	int maxpos = 5;
+	int curpos = m_sldrStressTimer.GetPos();
+
+	switch (nSBCode)
+	{
+	case SB_LEFT:      // Scroll to far left.
+		curpos = minpos;
+		break;
+
+	case SB_RIGHT:      // Scroll to far right.
+		curpos = maxpos;
+		break;
+
+	case SB_ENDSCROLL:   // End scroll.
+		break;
+
+	case SB_LINELEFT:      // Scroll left.
+		SetTimerStressPos(curpos);
+		break;
+
+	case SB_LINERIGHT:   // Scroll right.
+		SetTimerStressPos(curpos);
+		break;
+
+	case SB_PAGELEFT:    // Scroll one page left.
+	{
+	}
+	break;
+
+	case SB_PAGERIGHT:      // Scroll one page right.
+	{
+	}
+	break;
+
+	case SB_THUMBPOSITION: // Scroll to absolute position. nPos is the position
+		SetTimerStressPos(nPos);
+		break;
+
+	case SB_THUMBTRACK:   // Drag scroll box to specified position. nPos is the
+		curpos = nPos;      // of the scroll box at the end of the drag operation.
+		break;
+	}
+
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+void CMFCApplicationDlg::SetTimerStressPos(int iNewPos)
+{
+	if (m_TimerStressPos != iNewPos) // aenderungserkennung
+	{
+		m_TimerStressPos = iNewPos;
+		if (0 < m_TimerStressPos)
+			SetTimer(TIMER_STRESS, 5000 * (6 - m_TimerStressPos), NULL);
+		else
+			KillTimer(TIMER_STRESS);
+	}
 }
