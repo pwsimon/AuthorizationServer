@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="AuthorizationServer" Language="1033" Version="1.0.0.0" Manufacturer="" UpgradeCode="83ef299d-d978-4ba8-9fe5-fc78e344a755">
+		<Package InstallerVersion="405" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<!-- MediaTemplate Element, http://wixtoolset.org/documentation/manual/v3/xsd/wix/mediatemplate.html -->
+		<MediaTemplate EmbedCab="yes" />
+
+		<Feature Id="VCRedist" Title="Visual C++ 12.0 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
+			<MergeRef Id="VCRedist"/>
+			<MergeRef Id="MFCRedist"/>
+		</Feature>
+
+		<Feature Id="ProductFeature" Title="SetupProject" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="AuthorizationServer" />
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<!--
+			How To: Install the Visual C++ Redistributable with your installer, http://wixtoolset.org/documentation/manual/v3/howtos/redistributables_and_install_checks/install_vcredist.html
+			die msvcr120.. und mfc120... DLLs werden typischerweise (refcounted) nach c:\Windows\SysWOW64 installiert
+		-->
+		<DirectoryRef Id="TARGETDIR">
+			<Merge Id="VCRedist" SourceFile="$(env.ProgramFiles(x86))\Common Files\Merge Modules\Microsoft_VC120_DebugCRT_x86.msm" DiskId="1" Language="0"/>
+			<Merge Id="MFCRedist" SourceFile="$(env.ProgramFiles(x86))\Common Files\Merge Modules\Microsoft_VC120_DebugMFC_x86.msm" DiskId="1" Language="0"/>
+		</DirectoryRef>
+
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			<Component Id="WTLApplication" Guid="{BB6FA132-AB75-4903-9432-71864657BF30}">
+				<File Id='WTLApplicationEXE' Name='WTLApplication.exe' DiskId='1' Source='..\Debug\WTLApplication.exe' KeyPath='yes' />
+			</Component>
+			<Component Id="MFCApplication" Guid="{42164B83-8A4D-4983-A45C-566BEBD3F207}">
+				<File Id='MFCApplicationEXE' Name='MFCApplication.exe' DiskId='1' Source='..\Debug\MFCApplication.exe' KeyPath='yes' />
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>
