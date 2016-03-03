@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="AuthorizationServer" Language="1033" Version="1.0.0.0" Manufacturer="" UpgradeCode="83ef299d-d978-4ba8-9fe5-fc78e344a755">
+	<Product Id="*" Name="AuthorizationServer" Language="1033" Version="0.99.0.0" Manufacturer="pwsimon" UpgradeCode="83ef299d-d978-4ba8-9fe5-fc78e344a755">
 		<Package InstallerVersion="405" Compressed="yes" InstallScope="perMachine" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -14,6 +14,7 @@
 
 		<Feature Id="ProductFeature" Title="SetupProject" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentGroupRef Id="ConfigComponents" />
 		</Feature>
 	</Product>
 
@@ -21,6 +22,8 @@
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="ProgramFilesFolder">
 				<Directory Id="INSTALLFOLDER" Name="AuthorizationServer" />
+			</Directory>
+			<Directory Id="AppDataFolder">
 			</Directory>
 		</Directory>
 	</Fragment>
@@ -41,6 +44,16 @@
 			</Component>
 			<Component Id="MFCApplication" Guid="{42164B83-8A4D-4983-A45C-566BEBD3F207}">
 				<File Id='MFCApplicationEXE' Name='MFCApplication.exe' DiskId='1' Source='..\Debug\MFCApplication.exe' KeyPath='yes' />
+			</Component>
+		</ComponentGroup>
+
+		<ComponentGroup Id="ConfigComponents" Directory="AppDataFolder">
+			<Component Id="ConfigFiles" Guid="{80349109-6DAF-4B31-AC26-70EA1FB576A0}">
+				<RegistryKey Root="HKCU" Key="AuthorizationServer">
+					<RegistryValue Type="integer" Value="1" KeyPath="yes" />
+				</RegistryKey>
+				<File Id='ClientSecretJSON' Name='client_secret_SimulatorClientId.json' DiskId='1' Source='$(env.AppData)\client_secret_SimulatorClientId.json' />
+				<File Id='TokenResponseJSON' Name='client_secret_SimulatorClientId.TokenResponse-user' DiskId='1' Source='$(env.AppData)\client_secret_SimulatorClientId.TokenResponse-user' />
 			</Component>
 		</ComponentGroup>
 	</Fragment>
