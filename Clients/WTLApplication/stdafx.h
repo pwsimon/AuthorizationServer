@@ -14,6 +14,7 @@
 #include <atlbase.h>
 #include <atlstr.h> // muss VOR atlapp.h
 #include <atlapp.h>
+#include <atlctrls.h>
 
 extern CAppModule _Module;
 

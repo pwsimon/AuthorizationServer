@@ -21,6 +21,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="oAuth.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />

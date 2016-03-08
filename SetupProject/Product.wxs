@@ -13,7 +13,8 @@
 		</Feature>
 
 		<Feature Id="ProductFeature" Title="SetupProject" Level="1">
-			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentRef Id="AuthorizationServer" />
+			<ComponentGroupRef Id="ClientComponents" />
 			<ComponentGroupRef Id="ConfigComponents" />
 		</Feature>
 	</Product>
@@ -38,7 +39,7 @@
 			<Merge Id="MFCRedist" SourceFile="$(env.ProgramFiles(x86))\Common Files\Merge Modules\Microsoft_VC120_DebugMFC_x86.msm" DiskId="1" Language="0"/>
 		</DirectoryRef>
 
-		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+		<ComponentGroup Id="ClientComponents" Directory="INSTALLFOLDER">
 			<Component Id="WTLApplication" Guid="{BB6FA132-AB75-4903-9432-71864657BF30}">
 				<File Id='WTLApplicationEXE' Name='WTLApplication.exe' DiskId='1' Source='..\Debug\WTLApplication.exe' KeyPath='yes' />
 			</Component>

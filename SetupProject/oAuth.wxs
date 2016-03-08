@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="INSTALLFOLDER">
+            <Component Id="AuthorizationServer" Guid="{46344A91-3C84-42E2-93CC-68BAEFB299F1}">
+                <File Id="AuthorizationServerDLL" KeyPath="yes" Source="..\Debug\oAuth.dll">
+                    <TypeLib Id="{D15C842E-5C07-4F67-B140-D2C82A488220}" Description="oAuthLib" Language="0" MajorVersion="1" MinorVersion="0">
+                        <AppId Description="oAuth" Id="{26994C40-1DA1-4466-97D9-160FF331D921}">
+                            <Class Id="{A81A158E-D7F3-4224-A944-830FEBAAD484}" Context="InprocServer32" Description="TokenFile Class" ThreadingModel="apartment" Version="1.0">
+                                <ProgId Id="oAuth.TokenFile.1" Description="TokenFile Class">
+                                    <ProgId Id="oAuth.TokenFile" Description="TokenFile Class" />
+                                </ProgId>
+                            </Class>
+                        </AppId>
+                        <Interface Id="{63E60B3F-4050-42A3-B84C-263D975D4643}" Name="IRenewCallback" ProxyStubClassId32="{00020424-0000-0000-C000-000000000046}" />
+                        <Interface Id="{FDC61412-9511-41D9-BE29-EBD9016AA565}" Name="IAuthorize" ProxyStubClassId32="{00020424-0000-0000-C000-000000000046}" />
+                    </TypeLib>
+                </File>
+                <RegistryValue Root="HKCR" Key=".TokenResponse-user" Value="oAuth.TokenFile.1" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="AppID\oAuth.DLL" Name="AppID" Value="{26994C40-1DA1-4466-97D9-160FF331D921}" Type="string" Action="write" />
+                <RegistryValue Root="HKCR" Key="AppID\{26994C40-1DA1-4466-97D9-160FF331D921}" Name="DllSurrogate" Value="" Type="string" Action="write" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>
