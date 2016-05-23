@@ -223,7 +223,9 @@ STDMETHODIMP CTokenFile::LockForRenew(
 	if (NULL == m_spLockForRenew)
 	{
 		// das obenstehende if (NULL == m_spLockForRenew) ist nur sicher wenn das alles singlethreaded ist
-		m_spLockForRenew.CreateInstance(__uuidof(MSXML2::XMLHTTP40));
+		// differences between Msxml2.ServerXMLHTTP and WinHttp.WinHttpRequest?, http://stackoverflow.com/questions/1163045/differences-between-msxml2-serverxmlhttp-and-winhttp-winhttprequest
+		// see also: WTSDisconnected
+		m_spLockForRenew.CreateInstance(__uuidof(MSXML2::ServerXMLHTTP40)); // __uuidof(MSXML2::XMLHTTP40)
 		ATLTRACE2(atlTraceGeneral, 0, _T("  POST: %s\n"), (LPCTSTR)m_strTokenUri);
 		m_spLockForRenew->open(L"POST", (LPCTSTR)m_strTokenUri, VARIANT_TRUE); // "https://webapi.teamviewer.com/api/v1/oauth2/token"
 

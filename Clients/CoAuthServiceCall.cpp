@@ -176,7 +176,7 @@ void CoAuthServiceCall::OnFinalRelease()
 HRESULT CoAuthServiceCall::Init(LPCTSTR szMethod, LPCTSTR szUrl)
 {
 	_ASSERT(NULL == m_spRequest); // initalize only once
-	m_spRequest.CreateInstance(__uuidof(MSXML2::XMLHTTP40));
+	m_spRequest.CreateInstance(__uuidof(MSXML2::ServerXMLHTTP40)); // MSXML2::XMLHTTP40
 
 	// add sink to xml http request
 	const DWORD dwRef = CCmdTarget::m_dwRef;

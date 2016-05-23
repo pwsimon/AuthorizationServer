@@ -44,6 +44,9 @@
     <ClInclude Include="..\IWorkflowWebImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\CallbackoAuth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WTLApplication.rc">

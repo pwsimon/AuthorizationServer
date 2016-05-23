@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef _DEBUG
+	#include <Wtsapi32.h>
+#endif
+
 #define ID_XMLHTTPREQUESTEVENTS  1
 #define MSXML_VERSION_MAJOR      4
 #define MSXML_VERSION_MINOR      0
@@ -178,7 +182,7 @@ public:
 */
 	HRESULT Init(LPCTSTR szMethod, LPCTSTR szUrl) {
 		_ASSERT(NULL == m_spRequest); // initalize only once
-		m_spRequest.CreateInstance(__uuidof(MSXML2::XMLHTTP40));
+		m_spRequest.CreateInstance(__uuidof(MSXML2::ServerXMLHTTP40)); // MSXML2::XMLHTTP40
 
 		// add sink to xml http request
 		IDispatchPtr spSink;
@@ -272,7 +276,31 @@ public:
 				break;
 			case READYSTATE_COMPLETE:
 				{
-					ATLTRACE2(atlTraceGeneral, 1, _T("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_COMPLETE\n"), (BSTR)pThis->m_bstrUrl, m_eState);
+					ATLTRACE2(atlTraceGeneral, 1, _T("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: %d\n"), (BSTR)pThis->m_bstrUrl, m_eState, m_spRequest->status);
+
+#ifdef _DEBUG
+/*
+* WTSDisconnected (4) => WinStation logged on without client -> HTTP-Status: 0
+* - JEDER request mittels XMLHTTPRequest failed solange ich KEINE desktop session habe!
+*   das ist offensichtlich KEIN direkter zusammenhang: also nach einem "connect" ist NICHT garantiert das der naechste request durchgeht ABER:
+*   nach ein paar sekunden faengt sich das system wieder von alleine???
+* - der request geht definitiv raus. d.H. im server-log sehe ich jeden request
+*   nur kommt der vom server gelieferte HTTP-Status hier im client nie an???
+* siehe auch: IRGENDEIN (unbehandelter) HTTP-Status
+*/
+					WTS_CONNECTSTATE_CLASS* pResult = NULL;
+					DWORD dwBytesReturned = 0;
+					if (::WTSQuerySessionInformation(
+						WTS_CURRENT_SERVER_HANDLE,
+						WTS_CURRENT_SESSION,
+						WTSConnectState,
+						(LPTSTR*)&pResult,
+						&dwBytesReturned))
+					{
+						ATLTRACE2(atlTraceGeneral, 1, _T("  READYSTATE_COMPLETE, WTSConnectState: %d, HTTP-Status: %d\n"), *pResult, m_spRequest->status);
+						::WTSFreeMemory(pResult);
+					}
+#endif
 
 /*
 * das wird erst noetig wenn wir den UseCase: Shutdown, Wait for pending requests implementieren
@@ -347,12 +375,17 @@ public:
 
 					else
 					{
-						// IRGENDEIN (unbehandelter) http-status
+/*
+* IRGENDEIN (unbehandelter) HTTP-Status
+* spezialfaelle:
+* - HTTP-Status code: 0 kann reproduziert werden wenn ich mich von der WTS-Session detache???
+*   what does this mean in MS XMLHTTP?, http://stackoverflow.com/questions/872206/http-status-code-0-what-does-this-mean-in-ms-xmlhttp
+*/
 						m_eState = Finish;
 						pThis->onFailed();
 
 						// break reference cycle
-						// Remove sink from xml http request, hie faellt evtl. die letzte referenz
+						// Remove sink from xml http request, hier faellt evtl. die letzte referenz
 						// entweder KEINEN code mehr ausfuehren ODER Lock/Unlock
 						m_spRequest->put_onreadystatechange(NULL);
 					}
