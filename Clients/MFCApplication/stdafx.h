@@ -54,7 +54,10 @@
 #endif
 
 // were using XMLHTTPRequest for network access
-#import <msxml4.dll> no_function_mapping
+#import <msxml6.dll> no_function_mapping
+#define XMLHTTP_COMPONENT L"Msxml2.ServerXMLHTTP.6.0"
+// #define XMLHTTP_COMPONENT L"Msxml2.XMLHTTP.6.0"
+// #define XMLHTTP_COMPONENT __uuidof(MSXML2::ServerXMLHTTP60)
 
 // the "AuthrizationServer" itself
 #ifdef _DEBUG

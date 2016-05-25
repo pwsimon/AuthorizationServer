@@ -109,7 +109,7 @@ STDMETHODIMP CTokenFile::Load(
 			// CString strRedirectUri(installed["redirect_uris"].asCString());
 		}
 
-		// die configuration/settings werden (sofern vorhanden) aus der "%appdata%/estos/procall 5/<bstrAPIPrefix>.Apis.Auth.OAuth2.Responses.TokenResponse - user" geladen
+		// die configuration/settings werden (sofern vorhanden) aus der "%appdata%/client_secret_<ClientId>.TokenResponse-user" geladen
 		HRESULT hr = LoadTokenResponseFromFile(pszFileName, dwMode);
 		if (SUCCEEDED(hr))
 		{
@@ -118,7 +118,7 @@ STDMETHODIMP CTokenFile::Load(
 			CComPtr < IRunningObjectTable > spROT;
 			hr = ::GetRunningObjectTable(NULL, &spROT);
 			// mit grfFlags = 0 wird NUR das verhalten bzgl. IExternalConnection gesteuert
-			// harte/interne referenzen koennen/duerfen NIEMALS ausser kraft gesetz werden.
+			// harte/interne referenzen koennen/duerfen NIEMALS ausser kraft gesetzt werden.
 			hr = spROT->Register(0, GetUnknown(), spMK, &m_lCookieRegister);
 			if (SUCCEEDED(hr))
 			{
@@ -222,10 +222,16 @@ STDMETHODIMP CTokenFile::LockForRenew(
 	ATLTRACE2(atlTraceGeneral, 0, _T("CTokenFile(%s)::IAuthorize::LockForRenew()\n"), m_strClientId);
 	if (NULL == m_spLockForRenew)
 	{
-		// das obenstehende if (NULL == m_spLockForRenew) ist nur sicher wenn das alles singlethreaded ist
-		// differences between Msxml2.ServerXMLHTTP and WinHttp.WinHttpRequest?, http://stackoverflow.com/questions/1163045/differences-between-msxml2-serverxmlhttp-and-winhttp-winhttprequest
-		// see also: WTSDisconnected
-		m_spLockForRenew.CreateInstance(__uuidof(MSXML2::ServerXMLHTTP40)); // __uuidof(MSXML2::XMLHTTP40)
+/*
+* das obenstehende if (NULL == m_spLockForRenew) ist nur sicher wenn das alles singlethreaded ist
+* differences between Msxml2.ServerXMLHTTP and WinHttp.WinHttpRequest?
+* - http://stackoverflow.com/questions/1163045/differences-between-msxml2-serverxmlhttp-and-winhttp-winhttprequest
+* - bei verwendung von MSXML2::ServerXMLHTTP40 sind die requests NICHT mehr mit Fiddler2 zu tracen
+* see also: WTSDisconnected
+*/
+		// m_spLockForRenew.CreateInstance(__uuidof(MSXML2::XMLHTTP40)); // for use with Fiddler
+		// m_spLockForRenew.CreateInstance(__uuidof(MSXML2::ServerXMLHTTP40)); // for use with WTSDisconnected
+		m_spLockForRenew.CreateInstance(XMLHTTP_COMPONENT); // reduce dependencies of foreign components
 		ATLTRACE2(atlTraceGeneral, 0, _T("  POST: %s\n"), (LPCTSTR)m_strTokenUri);
 		m_spLockForRenew->open(L"POST", (LPCTSTR)m_strTokenUri, VARIANT_TRUE); // "https://webapi.teamviewer.com/api/v1/oauth2/token"
 

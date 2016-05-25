@@ -18,7 +18,7 @@ i start publishing very early to train/learn how to develop with GitHub.
 RoadMap:
 - [X] ready to run Server component
 - [X] library for easy Client development
-- [X] public/cloud [simulator](http://simulatorauthserver.appspot.com/) Service API for quick and easy demo
+- [X] public/cloud [simulator](http://simulatorauthserver-1310.appspot.com/) Service API for quick and easy demo
 - [X] ready to run sample (WTL/MFC) for quick and easy demo
 - [ ] tool to perfom UserConsent on real Service APIs
 - [ ] redistributable package (.msi merge module)

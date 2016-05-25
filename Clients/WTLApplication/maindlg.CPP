@@ -34,11 +34,13 @@ LRESULT CMainDlg::OnHScroll(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /
 	switch (LOWORD(wParam))
 	{
 	case SB_LEFT:      // Scroll to far left.
-		curpos = SLIDER_MIN;
+		_ASSERT(SLIDER_MIN == curpos);
+		SetTimerStressPos(SLIDER_MIN); // Pos1 key
 		break;
 
 	case SB_RIGHT:      // Scroll to far right.
-		curpos = SLIDER_MAX;
+		_ASSERT(SLIDER_MAX == curpos);
+		SetTimerStressPos(SLIDER_MAX); // End key
 		break;
 
 	case SB_ENDSCROLL:   // End scroll.
@@ -53,14 +55,12 @@ LRESULT CMainDlg::OnHScroll(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /
 		break;
 
 	case SB_PAGELEFT:    // Scroll one page left.
-	{
-	}
-	break;
+		SetTimerStressPos(curpos); // click left side of slider
+		break;
 
-	case SB_PAGERIGHT:      // Scroll one page right.
-	{
-	}
-	break;
+	case SB_PAGERIGHT:   // Scroll one page right.
+		SetTimerStressPos(curpos); // click right side of slider
+		break;
 
 	case SB_THUMBPOSITION: // Scroll to absolute position. nPos is the position
 		SetTimerStressPos(HIWORD(wParam));

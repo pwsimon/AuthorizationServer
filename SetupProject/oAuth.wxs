@@ -3,6 +3,7 @@
     <Fragment>
         <DirectoryRef Id="INSTALLFOLDER">
             <Component Id="AuthorizationServer" Guid="{46344A91-3C84-42E2-93CC-68BAEFB299F1}">
+                <File Id="cppRESTDLL" Source="..\packages\cpprestsdk.v120.windesktop.msvcstl.dyn.rt-dyn.2.7.0\lib\native\v120\windesktop\msvcstl\dyn\rt-dyn\x86\Debug\cpprest120d_2_7.dll" />
                 <File Id="AuthorizationServerDLL" KeyPath="yes" Source="..\Debug\oAuth.dll">
                     <TypeLib Id="{D15C842E-5C07-4F67-B140-D2C82A488220}" Description="oAuthLib" Language="0" MajorVersion="1" MinorVersion="0">
                         <AppId Description="oAuth" Id="{26994C40-1DA1-4466-97D9-160FF331D921}">

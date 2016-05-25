@@ -181,8 +181,9 @@ public:
 * Methoden aus dem C/C++ interface sind im gegensatz zu COM interface "relativ" frei in wahl ob sie exception werfen oder nicht
 */
 	HRESULT Init(LPCTSTR szMethod, LPCTSTR szUrl) {
+		T* pThis = static_cast<T*>(this);
 		_ASSERT(NULL == m_spRequest); // initalize only once
-		m_spRequest.CreateInstance(__uuidof(MSXML2::ServerXMLHTTP40)); // MSXML2::XMLHTTP40
+		m_spRequest.CreateInstance(XMLHTTP_COMPONENT);
 
 		// add sink to xml http request
 		IDispatchPtr spSink;
@@ -197,11 +198,31 @@ public:
 
 /*
 * hier laeuft schon der erste (synchrone) Callback (OnReadStateChange(READYSTATE_LOADING))
-* ungluecklicherweise koennen wir fuer den fall das der IWorkflow::AuthorizeRequest() failed KEINEN returnwert/exception liefern
-* ergo wird das IXMLHTTPRequest::send() unbedingt nachgeschoben. das heist wir muessen spaeter evtl. auf den falschen fehler 401 reagieren.
 */
 		CComVariant varAsync(VARIANT_TRUE);
 		m_spRequest->open(m_bstrMethod, m_bstrUrl, varAsync);
+
+/*
+* ungluecklicherweise koennen wir fuer den fall das der IWorkflow::AuthorizeRequest() failed KEINEN returnwert/exception liefern
+* ergo wird das IXMLHTTPRequest::send() unbedingt nachgeschoben.
+* das heist wir muessen spaeter evtl. auf die falschen/folge fehler reagieren.
+* z.B. 401 Unauthorized oder 500 InvalidRequest, ...
+*
+* gluecklicherweise muessen wir uns das verwendete m_bstrAccessToken merken ...
+* nachdem OHNE access_token nix geht ist das ein sicheres zeichen fuer einen fehler
+* die pruefung bzw. der vorzeitige exit hat keinen einfluss auf die funktionalitaet
+* vereinfacht aber vermutlich die fehlersuche/analyse da man ansonsten von einer fehlerhaften Authentication ausgeht
+* in diesem fall wurde ueberhaupt KEIN access_token angehaengt
+*/
+		if (0 == m_bstrAccessToken.Length())
+		{
+			ATLTRACE2(atlTraceGeneral, 0, _T("  no access_token from AuthenticationServer\n"));
+			m_eState = Finish;
+			pThis->onFailed();
+			m_spRequest->put_onreadystatechange(NULL);
+			return E_FAIL;
+		}
+
 #ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
 		m_spRequest->setRequestHeader(L"Accept", L"application/json");
 		// m_spRequest->setRequestHeader(L"Accept", L"application/json,application/xml");

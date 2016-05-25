@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Wix
+	xmlns="http://schemas.microsoft.com/wix/2006/wi"
+	xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
 	<Product Id="*" Name="AuthorizationServer" Language="1033" Version="0.99.0.0" Manufacturer="pwsimon" UpgradeCode="83ef299d-d978-4ba8-9fe5-fc78e344a755">
 		<Package InstallerVersion="405" Compressed="yes" InstallScope="perMachine" />
 
@@ -46,8 +48,16 @@
 			<Component Id="MFCApplication" Guid="{42164B83-8A4D-4983-A45C-566BEBD3F207}">
 				<File Id='MFCApplicationEXE' Name='MFCApplication.exe' DiskId='1' Source='..\Debug\MFCApplication.exe' KeyPath='yes' />
 			</Component>
+			<Component Id="ConfigurationShortcut" Guid="{6774234C-2479-4E0F-BA57-679CF77DAE4C}">
+				<util:InternetShortcut Id="SimulatorServiceShortcut" Name="Simulator Service" Target="http://simulatorauthserver-1310.appspot.com/index.html" />
+			</Component>
 		</ComponentGroup>
 
+		<!--
+			hier brauch ich noch eine custom action und ein cURL.exe tool
+			mit dem InstallFinalize soll dadurch ein token abgeholt und als client_secret_SimulatorClientId.TokenResponse-user persistiert werden
+			damit wird das statische file TokenResponseJSON obsolet
+		-->
 		<ComponentGroup Id="ConfigComponents" Directory="AppDataFolder">
 			<Component Id="ConfigFiles" Guid="{80349109-6DAF-4B31-AC26-70EA1FB576A0}">
 				<RegistryKey Root="HKCU" Key="AuthorizationServer">

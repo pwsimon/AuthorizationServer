@@ -139,7 +139,7 @@ HowTo Start with a PreBuilt Demo: (TeamViewer)
 	Register to your machine %windir%\SysWOW64\regsvr32.exe oAuth.dll
 	checkout the "oacurl" (Binary) oacurl.exe
 	Start with the "Developer Console" of your choice and Create/Setup your Application (e.g. TeamViewer)
-		safe the resulting credentials as file. (e.g. "%appdata%\teamviewer_client_secret.json")
+		safe the resulting credentials as file. (e.g. "%appdata%\client_secret_<ClientId>.json")
 	Run oacurl.exe with the credentials as file as parameter
 		as result you got a file with all the needed tokens for authentication. (e.g. "%appdata%\TeamViewer.Apis.Auth.OAuth2.Responses.TokenResponse-user")
 
