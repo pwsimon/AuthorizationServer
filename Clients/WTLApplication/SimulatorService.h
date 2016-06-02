@@ -49,29 +49,35 @@ public:
 #endif
 
 	void onFailed() {
-		::SendMessage(m_hwndResult, WM_SETTEXT, 0, (LPARAM)_T("OnFailed"));
-
-/*
-* die ausgabe von HTTP-Status, statusText, ... ist im fehlerfall wichtiger/sinvoller als im gut fall
-*/
 		try
 		{
+			::SendMessage(m_hwndResult, WM_SETTEXT, 0, (LPARAM)_T("OnFailed"));
+
+			if (READYSTATE_COMPLETE == m_spRequest->readyState)
+			{
 /*
+* die ausgabe von HTTP-Status, statusText, ... ist im fehlerfall wichtiger/sinvoller als im gut fall
+*
 * eine granulare fehlerauswertung ist hier sicher sinnvoll um folgefehler zu vermeiden
 * z.B. wenn der Service voruebergehend nicht erreichbar ist mache es sinn es spaeter nochmal zu versuchen
 * bei einer fehlerhaften konfiguration koennen wir das vergessen (die wird sich nicht selbst heilen)
 */
-			ATLTRACE2(atlTraceGeneral, 0, _T("CSimulatorPing::onFailed() HTTP Status: 0x%d, %ls\n"), m_spRequest->status, (BSTR)m_spRequest->statusText);
-		}
-		catch (const _com_error& e)
-		{
+				ATLTRACE2(atlTraceGeneral, 0, _T("CSimulatorPing::onFailed() HTTP Status: 0x%d, %ls\n"), m_spRequest->status, (BSTR)m_spRequest->statusText);
+			}
+			else
+			{
 /*
 * onFailed() wird auch aufgerufen wenn der AuthenticationServer in einen fehler gelaufen ist.
 * z.B. config-files fehlen oder fehlende runtime/installation.
 * in diesem fall ist der m_spRequest->readyState noch READYSTATE_LOADING, wurde also niemals ausgefuehrt (send)
 * ein zugriff auf m_spRequest->status fuehrt dann zu einer exception
 */
-		_ASSERT(READYSTATE_LOADING == m_spRequest->readyState);
+				_ASSERT(READYSTATE_LOADING == m_spRequest->readyState);
+			}
+		}
+		catch (const _com_error& e)
+		{
+			_ASSERT(FALSE);
 		}
 	}
 

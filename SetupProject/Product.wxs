@@ -9,6 +9,30 @@
 		<!-- MediaTemplate Element, http://wixtoolset.org/documentation/manual/v3/xsd/wix/mediatemplate.html -->
 		<MediaTemplate EmbedCab="yes" />
 
+		<!--
+			hier brauch ich noch eine custom action und ein cURL.exe tool
+				Binary Element, http://wixtoolset.org/documentation/manual/v3/xsd/wix/binary.html
+			mit dem InstallFinalize soll dadurch ein token abgeholt und als client_secret_SimulatorClientId.TokenResponse-user persistiert werden
+			damit wird das statische file TokenResponseJSON obsolet
+		-->
+		<Binary Id='cURLEXE' SourceFile='curl.exe' />
+
+		<!--
+			Extra Actions, https://www.firegiant.com/wix/tutorial/events-and-actions/extra-actions/
+			Formatted, https://msdn.microsoft.com/en-us/library/windows/desktop/aa368609(v=vs.85).aspx
+		-->
+		<CustomAction Id='cURLFile'
+			BinaryKey='cURLEXE'
+			Execute='commit'
+			ExeCommand='-d "grant_type=authorization_code" -o "[AppDataFolder]\client_secret_SimulatorClientId.TokenResponse-user" http://simulatorauthserver-1310.appspot.com/token'
+			Return='asyncNoWait' />
+
+		<!-- InstallExecuteSequence Element, http://wixtoolset.org/documentation/manual/v3/xsd/wix/installexecutesequence.html -->
+		<InstallExecuteSequence>
+			<!-- WIX - Custom actions on Install but not on Uninstall or Upgrade, http://stackoverflow.com/questions/9535047/wix-custom-actions-on-install-but-not-on-uninstall-or-upgrade -->
+			<Custom Action='cURLFile' Before='InstallFinalize'>NOT Installed</Custom>
+		</InstallExecuteSequence>
+
 		<Feature Id="VCRedist" Title="Visual C++ 12.0 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
 			<MergeRef Id="VCRedist"/>
 			<MergeRef Id="MFCRedist"/>
@@ -53,18 +77,12 @@
 			</Component>
 		</ComponentGroup>
 
-		<!--
-			hier brauch ich noch eine custom action und ein cURL.exe tool
-			mit dem InstallFinalize soll dadurch ein token abgeholt und als client_secret_SimulatorClientId.TokenResponse-user persistiert werden
-			damit wird das statische file TokenResponseJSON obsolet
-		-->
 		<ComponentGroup Id="ConfigComponents" Directory="AppDataFolder">
 			<Component Id="ConfigFiles" Guid="{80349109-6DAF-4B31-AC26-70EA1FB576A0}">
 				<RegistryKey Root="HKCU" Key="AuthorizationServer">
 					<RegistryValue Type="integer" Value="1" KeyPath="yes" />
 				</RegistryKey>
 				<File Id='ClientSecretJSON' Name='client_secret_SimulatorClientId.json' DiskId='1' Source='$(env.AppData)\client_secret_SimulatorClientId.json' />
-				<File Id='TokenResponseJSON' Name='client_secret_SimulatorClientId.TokenResponse-user' DiskId='1' Source='$(env.AppData)\client_secret_SimulatorClientId.TokenResponse-user' />
 			</Component>
 		</ComponentGroup>
 	</Fragment>

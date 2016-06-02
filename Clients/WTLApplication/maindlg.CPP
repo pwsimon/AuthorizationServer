@@ -86,6 +86,12 @@ LRESULT CMainDlg::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL&
 	return 0;
 }
 
+/*
+* wir verwenden kueftig die Task Scheduler API
+* https://msdn.microsoft.com/en-us/library/windows/desktop/aa383614(v=vs.85).aspx
+* bzw. SetThreadExecutionState function https://msdn.microsoft.com/de-de/library/windows/desktop/aa373208(v=vs.85).aspx
+* und gehen damit dem SleepModus/PowerSaving options aus dem weg
+*/
 void CMainDlg::SetTimerStressPos(int iNewPos)
 {
 	if (m_TimerStressPos != iNewPos) // aenderungserkennung

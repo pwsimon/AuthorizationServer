@@ -115,7 +115,7 @@ public:
 *
 *   m_spAuthorize kennt den m_spRequest weil er ihn ja initial selbst erstellt hat.
 *   m_spAuthorize braucht den m_spRequest weil dort das ergebnis des "Renew" ermittelt wird.
-*   wir (CRenewTokenAsync) brauchen den m_spRequest lediglich um den callback (OnReadyStateChange) zu registrien bzw. zu deregistrieren.
+*   wir (CRenewTokenAsync) brauchen den m_spRequest lediglich um den callback (OnReadyStateChange) zu registrieren bzw. zu deregistrieren.
 */
 				HRESULT hr = m_spAuthorize->raw_UnLockFromRenew();
 				_ASSERT(SUCCEEDED(hr));
