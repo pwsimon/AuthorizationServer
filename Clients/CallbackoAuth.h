@@ -118,7 +118,6 @@ public:
 *   wir (CRenewTokenAsync) brauchen den m_spRequest lediglich um den callback (OnReadyStateChange) zu registrieren bzw. zu deregistrieren.
 */
 				HRESULT hr = m_spAuthorize->raw_UnLockFromRenew();
-				_ASSERT(SUCCEEDED(hr));
 
 				// break reference cycle
 				// Remove sink from xml http request
@@ -217,7 +216,6 @@ public:
 		if (0 == m_bstrAccessToken.Length())
 		{
 			ATLTRACE2(atlTraceGeneral, 0, _T("  no access_token from AuthenticationServer\n"));
-			m_eState = Finish;
 			pThis->onFailed();
 			m_spRequest->put_onreadystatechange(NULL);
 			return E_FAIL;
@@ -270,7 +268,9 @@ public:
 	{
 		T* pThis = static_cast<T*>(this);
 
-		m_eState = Finish;
+		m_eState = RetryOnce;
+		pThis->onFailed();
+		m_spRequest->put_onreadystatechange(NULL);
 		return NOERROR;
 	}
 
@@ -419,11 +419,28 @@ public:
 		Release(); // unlock your instance
 	};
 
+	/*
+	* sequence/usecase1: InitialRequest -> Finish
+	*   das AccessToken war gueltig und der request konnte durchgefuehrt werden. das ergebnis steht in m_spRequest->status, m_spRequest->readyState, ...
+	* sequence/usecase1: InitialRequest -> RetryOnce-> Finish
+	*   das AccessToken war ungueltig es wurde mit Renew ein erfolgreich ein neues AccessToken geholt und der urspruengliche request wiederholt
+	*   die wiederholung konnte durchgefuehrt werden. das ergebnis steht in m_spRequest->status, m_spRequest->readyState, ...
+	*/
+	enum _State { InitialRequest, RetryOnce, Finish };
+
 protected:
 	MSXML2::IXMLHTTPRequestPtr m_spRequest;
+	enum _State getState() { return m_eState; }
 
 private:
-	enum { InitialRequest, RetryOnce, Finish } m_eState;
+/*
+* sequence/usecase1: InitialRequest -> Finish
+*   das AccessToken war gueltig und der request konnte durchgefuehrt werden. das ergebnis steht in m_spRequest->status, m_spRequest->readyState, ...
+* sequence/usecase1: InitialRequest -> RetryOnce-> Finish
+*   das AccessToken war ungueltig es wurde mit Renew ein erfolgreich ein neues AccessToken geholt und der urspruengliche request wiederholt
+*   die wiederholung konnte durchgefuehrt werden. das ergebnis steht in m_spRequest->status, m_spRequest->readyState, ...
+*/
+	enum _State m_eState;
 	_bstr_t m_bstrMethod;
 	_bstr_t m_bstrUrl;
 
