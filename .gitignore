@@ -11,3 +11,5 @@ dlldata.c
 *.bak
 Debug/
 packages/
+/oAuth.VC.db
+/oAuth.VC.VC.opendb

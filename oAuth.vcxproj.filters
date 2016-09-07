@@ -73,8 +73,8 @@
     <None Include="TokenFile.rgs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="packages.config" />
     <None Include="README.md" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="oAuth.idl">
