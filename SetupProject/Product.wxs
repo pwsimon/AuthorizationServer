@@ -61,8 +61,8 @@
 			die msvcr120.. und mfc120... DLLs werden typischerweise (refcounted) nach c:\Windows\SysWOW64 installiert
 		-->
 		<DirectoryRef Id="TARGETDIR">
-			<Merge Id="VCRedist" SourceFile="$(env.ProgramFiles(x86))\Common Files\Merge Modules\Microsoft_VC120_DebugCRT_x86.msm" DiskId="1" Language="0"/>
-			<Merge Id="MFCRedist" SourceFile="$(env.ProgramFiles(x86))\Common Files\Merge Modules\Microsoft_VC120_DebugMFC_x86.msm" DiskId="1" Language="0"/>
+			<Merge Id="VCRedist" SourceFile="$(env.ProgramFiles(x86))\Common Files\Merge Modules\Microsoft_VC140_DebugCRT_x86.msm" DiskId="1" Language="0"/>
+			<Merge Id="MFCRedist" SourceFile="$(env.ProgramFiles(x86))\Common Files\Merge Modules\Microsoft_VC140_DebugMFC_x86.msm" DiskId="1" Language="0"/>
 		</DirectoryRef>
 
 		<ComponentGroup Id="ClientComponents" Directory="INSTALLFOLDER">
