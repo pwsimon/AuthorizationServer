@@ -245,20 +245,21 @@ STDMETHODIMP CTokenFile::LockForRenew(
 			varBody = postData;
 		}
 
-			{
-				CString strLen;
-				strLen.Format(_T("%d"), ::SysStringLen(V_BSTR(&varBody)));
-				m_spLockForRenew->setRequestHeader(L"Content-Length", (LPCTSTR)strLen);
-			}
+		{
+			CString strLen;
+			strLen.Format(_T("%d"), ::SysStringLen(V_BSTR(&varBody)));
+			m_spLockForRenew->setRequestHeader(L"Content-Length", (LPCTSTR)strLen);
+		}
 
-			m_spLockForRenew.QueryInterface(IID_PPV_ARGS(ppXMLHttpReq));
-			varBody.Detach(pvarBody);
-			return E_PENDING; // unser caller MUSS auf OnReadyStateChange warten
+		m_spLockForRenew.QueryInterface(IID_PPV_ARGS(ppXMLHttpReq));
+		varBody.Detach(pvarBody);
+		EventWriteCTokenFile_LockForRenew_DoLock((LPCTSTR)m_strTokenUri, V_BSTR(pvarBody));
+		return E_PENDING; // unser caller MUSS auf OnReadyStateChange warten
 	}
 	else
 	{
 #ifdef _DEBUG
-		// typischerweise wurde in der ensprechenden spezialisierung das COM_INTERFACE_ENTRY_CHAIN(CCallbackoAuthImpl < >) vergessen!
+		// typischerweise wurde in der entsprechenden spezialisierung das COM_INTERFACE_ENTRY_CHAIN(CCallbackoAuthImpl < >) vergessen!
 		CComQIPtr < IRenewCallback > spRenewCallback(pRenewCallback);
 		_ASSERT(NULL != spRenewCallback);
 #endif
@@ -266,6 +267,7 @@ STDMETHODIMP CTokenFile::LockForRenew(
 		m_lstRetryRequest.push_back(IUnknownPtr(pRenewCallback));
 		// unser caller (CRenewTokenAsync) soll nichts machen. er wird nicht gebraucht UND
 		// transparent zerstoert
+		EventWriteCTokenFile_LockForRenew_AlreadyLocked(m_lstRetryRequest.size());
 		return NOERROR;
 	}
 }
@@ -314,12 +316,17 @@ STDMETHODIMP CTokenFile::UnLockFromRenew(void)
 	// durch finalize aller pending requests wird zumindest der initiale (m_spLockForRenew)
 	// hinten angestellt, denn dieser wird ja letztlich erst vom caller durch behandeln des RetC verabeitet. erneuert
 	// nachdem aber alle requests async sind darf sich sowieso keiner auf eine reihenfolge verlassen.
-#ifdef _DEBUG
 	if (SUCCEEDED(hr))
+	{
 		ATLTRACE2(atlTraceGeneral, 0, _T("  CRenewTokenAsync::IXMLDOMDocumentEvents::UnLockFromRenew() requeue: %d pending requests\n"), m_lstRetryRequest.size());
+		EventWriteCTokenFile_UnLockFromRenew_Succeeded((LPCTSTR)m_strClientId, m_lstRetryRequest.size());
+	}
 	else
+	{
 		ATLTRACE2(atlTraceGeneral, 0, _T("  CRenewTokenAsync::IXMLDOMDocumentEvents::UnLockFromRenew() terminate: %d pending requests\n"), m_lstRetryRequest.size());
-#endif
+		EventWriteCTokenFile_UnLockFromRenew_Failed((LPCTSTR)m_strClientId, m_lstRetryRequest.size());
+	}
+
 	while (m_lstRetryRequest.size())
 	{
 		CComQIPtr < IRenewCallback > spRenewCallback(m_lstRetryRequest.front().m_T);

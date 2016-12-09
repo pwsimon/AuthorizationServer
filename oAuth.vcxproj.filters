@@ -17,6 +17,9 @@
       <UniqueIdentifier>{8e33dedb-e9f1-4d55-b07c-5e29569ae886}</UniqueIdentifier>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="EventTrace">
+      <UniqueIdentifier>{6c79d14e-57b2-4cb5-a058-677101a4c00d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -54,10 +57,16 @@
     <ClInclude Include="TokenFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="oAuthEvents.h">
+      <Filter>EventTrace</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="oAuth.rc">
       <Filter>Resource Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="oAuthEvents.rc">
+      <Filter>EventTrace</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +84,9 @@
     </None>
     <None Include="README.md" />
     <None Include="packages.config" />
+    <None Include="oAuth.man">
+      <Filter>EventTrace</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="oAuth.idl">

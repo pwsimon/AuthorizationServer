@@ -1,0 +1,298 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes'?>
+<instrumentationManifest xmlns="http://schemas.microsoft.com/win/2004/08/events">
+	<instrumentation
+		xmlns:win="http://manifests.microsoft.com/win/2004/08/windows/events"
+		xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+		<events xmlns="http://schemas.microsoft.com/win/2004/08/events">
+			<!-- https://msdn.microsoft.com/en-us/library/windows/desktop/dd996926(v=vs.85).aspx -->
+			<provider
+				guid="{FB032477-D79F-47BB-9FC0-A80F612E5E55}"
+				message="$(string.providermessage)"
+				messageFileName="C:\Users\psi\Source\Repos\AuthorizationServer\Debug\oAuth.dll"
+				name="PRIVATE-PWSIMON-DEV-AuthorizationServer"
+				resourceFileName="C:\Users\psi\Source\Repos\AuthorizationServer\Debug\oAuth.dll"
+				symbol="PRIVATE_PWSIMON_DEV_AUTHORIZATIONSERVER">
+
+				<channels>
+					<!--ImportChannels - System, Application, Security or Setup-->
+					<importChannel
+						chid="C1"
+						name="Application" />
+					<!--Direct channels - type Analytic or Debug-->
+					<channel
+						name="PRIVATE-PWSIMON-DEV-AuthorizationServer/Debug"
+						chid="C2"
+						type="Debug"
+						symbol="DEBUG_CHANNEL"
+						isolation="System"
+						enabled="false">
+						<logging>
+							<retention>true</retention>
+							<maxSize>1000000</maxSize>
+						</logging>
+						<publishing>
+							<level>2</level>
+							<keywords>0x00</keywords>
+						</publishing>
+					</channel>
+				</channels>
+
+				<!--
+					Templates define event payloads. In this sample, simple data types such as Integer, Float, Boolean, String and GUID are considered. 
+					inType is the type of data that the provider logs to ETW session at run time. 
+					outType is the type of data that a consumer tool uses to interprete the log.
+					If outType is ommitted then it means it is the same as inType
+				-->
+				<templates>
+					<template tid="T_HR">
+						<!-- DataDefinitionType Complex Type, https://msdn.microsoft.com/en-us/library/windows/desktop/aa382747(v=vs.85).aspx -->
+						<data
+							inType="win:UInt32"
+							outType="win:ErrorCode"
+							name="HRESULT" />
+					</template>
+					<template tid="T_SIZE">
+						<data
+							inType="win:UInt32"
+							name="size" />
+					</template>
+					<template tid="T_NAME_SIZE">
+						<data
+							inType="win:UnicodeString"
+							name="Name" />
+						<data
+							inType="win:UInt32"
+							name="size" />
+					</template>
+					<template tid="T_HR_MSG">
+						<data
+							inType="win:UInt32"
+							outType="win:ErrorCode"
+							name="HRESULT" />
+						<data
+							inType="win:UnicodeString"
+							name="Msg" />
+					</template>
+					<template tid="T_HR_CLASS_NAME">
+						<data
+							inType="win:UInt32"
+							outType="win:ErrorCode"
+							name="HRESULT" />
+						<data
+							inType="win:UnicodeString"
+							name="Class" />
+						<data
+							inType="win:UnicodeString"
+							name="Name" />
+					</template>
+					<template tid="T_HR_CLASS_NAME_GUID">
+						<data
+							inType="win:UInt32"
+							outType="win:ErrorCode"
+							name="HRESULT" />
+						<data
+							inType="win:UnicodeString"
+							name="Class" />
+						<data
+							inType="win:UnicodeString"
+							name="Name" />
+						<data
+							inType="win:GUID"
+							name="CLSID" />
+					</template>
+					<template tid="T_HR_CLASS_NAME_FILETIME">
+						<data
+							inType="win:UInt32"
+							outType="win:ErrorCode"
+							name="HRESULT" />
+						<data
+							inType="win:UnicodeString"
+							name="Class" />
+						<data
+							inType="win:UnicodeString"
+							name="Name" />
+						<data
+							inType="win:FILETIME"
+							name="LastModified" />
+					</template>
+					<template tid="T_CLASS_NAME">
+						<data
+							inType="win:UnicodeString"
+							name="Class" />
+						<data
+							inType="win:UnicodeString"
+							name="Name" />
+					</template>
+					<template tid="T_HR_CLASS_METHOD_DESC">
+						<data
+							inType="win:UInt32"
+							outType="win:ErrorCode"
+							name="HRESULT" />
+						<data
+							inType="win:UnicodeString"
+							name="Class" />
+						<data
+							inType="win:UnicodeString"
+							name="Method" />
+						<data
+							inType="win:UnicodeString"
+							name="Desc" />
+					</template>
+					<template tid="T_XHR_URL_RESULT">
+						<data
+							inType="win:UnicodeString"
+							name="Url" />
+						<data
+							inType="win:UnicodeString"
+							name="Result" />
+					</template>
+					<template tid="T_XHR_URL_PAYLOAD">
+						<data
+							inType="win:UnicodeString"
+							name="Url" />
+						<data
+							inType="win:UnicodeString"
+							name="Payload" />
+					</template>
+					<template tid="T_XHR_URL_PAYLOAD_RESULT">
+						<data
+							inType="win:UnicodeString"
+							name="Url" />
+						<data
+							inType="win:UnicodeString"
+							name="Payload" />
+						<data
+							inType="win:UnicodeString"
+							name="Result" />
+					</template>
+				</templates>
+
+				<events>
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.101)"
+						symbol="COMFinalConstruct"
+						template="T_HR_CLASS_NAME"
+						value="101" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.102)"
+						symbol="COMFinalRelease"
+						template="T_CLASS_NAME"
+						value="102" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.103)"
+						symbol="COMError"
+						template="T_HR_CLASS_METHOD_DESC"
+						value="103" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.104)"
+						symbol="genericXHR_GET"
+						template="T_XHR_URL_RESULT"
+						value="104" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.105)"
+						symbol="genericXHR_POST"
+						template="T_XHR_URL_PAYLOAD_RESULT"
+						value="105" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.120)"
+						symbol="CTokenFile_LockForRenew_DoLock"
+						template="T_XHR_URL_PAYLOAD"
+						value="120" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.121)"
+						symbol="CTokenFile_LockForRenew_AlreadyLocked"
+						template="T_SIZE"
+						value="121" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.130)"
+						symbol="CTokenFile_UnLockFromRenew_Succeeded"
+						template="T_NAME_SIZE"
+						value="130" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.131)"
+						symbol="CTokenFile_UnLockFromRenew_Failed"
+						template="T_NAME_SIZE"
+						value="131" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.900)"
+						symbol="AutomationInstanceTerminatedDirty"
+						template="T_HR"
+						value="900" />
+					<event
+						channel="C2"
+						level="win:Informational"
+						message="$(string.event.901)"
+						symbol="UIInstanceTerminatedDirty"
+						template="T_HR"
+						value="901" />
+				</events>
+		</provider>
+		</events>
+	</instrumentation>
+
+	<localization>
+		<resources culture="en-US">
+			<stringTable>
+				<string
+					id="providermessage"
+					value="PRIVATE PWSIMON AuthorizationServer" />
+				<string
+					id="event.101"
+					value="%1 = %2(%3)::FinalConstruct" />
+				<string
+					id="event.102"
+					value="%1(%2)::FinalRelease" />
+				<string
+					id="event.103"
+					value="%1 = %2::%3() %4" />
+				<string
+					id="event.104"
+					value="%1, Result:%2" />
+				<string
+					id="event.105"
+					value="%1, Payload:%2, Result:%3" />
+				<string
+					id="event.120"
+					value="CTokenFile::LockForRenew() trigger renew and lock. defer future requests, %1 %2" />
+				<string
+					id="event.121"
+					value="CTokenFile::LockForRenew() already locked, cached request size: %1" />
+				<string
+					id="event.130"
+					value="CTokenFile::UnLockFromRenew() Succeeded, repeat %1 defered requests" />
+				<string
+					id="event.131"
+					value="CTokenFile::UnLockFromRenew() Failed, terminate %1 defered requests" />
+				<string
+					id="event.900"
+					value="Automation Instance Terminated Dirty, %1" />
+				<string
+					id="event.901"
+					value="UI Instance Terminated Dirty, %1" />
+			</stringTable>
+		</resources>
+	</localization>
+
+</instrumentationManifest>

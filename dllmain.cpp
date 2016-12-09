@@ -11,5 +11,18 @@ CoAuthModule _AtlModule;
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
 	hInstance;
+	if (dwReason == DLL_PROCESS_ATTACH)
+	{
+		BOOL bRetC = _AtlModule.DllMain(dwReason, lpReserved);
+		EventRegisterPRIVATE_PWSIMON_DEV_AuthorizationServer();
+		return bRetC;
+	}
+
+	else if (dwReason == DLL_PROCESS_DETACH)
+	{
+		EventUnregisterPRIVATE_PWSIMON_DEV_AuthorizationServer();
+		return _AtlModule.DllMain(dwReason, lpReserved);
+	}
+
 	return _AtlModule.DllMain(dwReason, lpReserved);
 }

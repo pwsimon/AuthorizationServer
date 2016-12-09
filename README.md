@@ -19,10 +19,11 @@ RoadMap:
 - [X] ready to run Server component
 - [X] library for easy Client development
 - [X] public/cloud [simulator](http://simulatorauthserver-1310.appspot.com/) Service API for quick and easy demo
+- [ ] private/cloud [simulator](http://localhost:1310/) Service API for quick and easy demo
 - [X] ready to run sample (WTL/MFC) for quick and easy demo
 - [ ] tool to perfom UserConsent on real Service APIs
 - [ ] redistributable package (.msi merge module)
-- [ ] installer package
+- [X] installer package
 
 ## Server component
 this ATL EXE Server component is the one and only controller (single point of control) for the TokenResponse-user file.
@@ -40,12 +41,25 @@ this client library simply consists of some base classes.
 this classes are shipped as .cpp and .h files not packaged as library.
 you have to copy these classes into your project.
 
-## ready to run sample(s)
-with this Application(s) and the public/cloud service you get a quick start.
-i suggest to start with the WTL sample wich is the most intuitive sample.
+## cloud services(s)
+for real-live demonstration of the (Client-Side) core components you need a WebService too.
+i provide some basic services to start instantly.
+all these different implementations below can be used interchangeable.
+
+### public/cloud service
+this service is implemented as JavaServlet and hosted on [Google AppEngine (PAAS)](https://console.cloud.google.com/home/).
+
+### private/cloud service
+this service is implemented as NodeJS application and the prefered solution for development or investigation.
+i started this project using [Visual Studio Code](https://code.visualstudio.com/d?utm_expid=101350005-35.Eg8306GUR6SersZwpBjURQ.3&utm_referrer=https%3A%2F%2Fwww.google.de%2F) instead of [Node.js Tools 1.2 for Visual Studio 2015 (NTVS)](https://marketplace.visualstudio.com/items?itemName=NodejsToolsforVisualStudio.NodejsTools12forVisualStudio2015)
+
+## ready to run sample(s) and services
+this repository also contains a SetupProject including a prebuilt .msi for windows systems.
+using this installer package and the public/cloud service you get a quick start.
 
 ### WTL
 this Application is based on ATL and therefore designed to work with template classes.
+i suggest to start with the WTL sample which is the most intuitive sample.
 
 ### MFC
 this Application is based on MFC only and has no other requirements.

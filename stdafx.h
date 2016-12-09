@@ -30,3 +30,4 @@
 // #define XMLHTTP_COMPONENT L"Msxml2.XMLHTTP.6.0"
 // #define XMLHTTP_COMPONENT __uuidof(MSXML2::ServerXMLHTTP60)
 
+#include "oAuthEvents.h"

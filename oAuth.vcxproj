@@ -40,10 +40,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>true</LinkIncremental>
+    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
+    <CustomBuildAfterTargets>PreBuildEvent</CustomBuildAfterTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -78,6 +80,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <RegisterOutput>false</RegisterOutput>
     </Link>
+    <CustomBuildStep>
+      <Outputs>oAuthEvents.h</Outputs>
+      <Command>"C:\Program Files (x86)\Windows Kits\10\bin\x86\mc.exe" -v -um -z oAuthEvents oAuth.man</Command>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -114,6 +121,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <RegisterOutput>false</RegisterOutput>
     </Link>
+    <CustomBuildStep>
+      <Outputs>oAuthEvents.h</Outputs>
+      <Command>"C:\Program Files (x86)\Windows Kits\10\bin\x86\mc.exe" -v -um -z oAuthEvents oAuth.man</Command>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -141,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h" />
+    <ClInclude Include="oAuthEvents.h" />
     <ClInclude Include="oAuth_i.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -149,12 +162,14 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="oAuth.rc" />
+    <ResourceCompile Include="oAuthEvents.rc" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="oAuth.def" />
+    <None Include="oAuth.man" />
     <None Include="oAuth.rgs" />
     <None Include="packages.config" />
     <None Include="README.md" />
