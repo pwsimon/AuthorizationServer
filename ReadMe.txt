@@ -150,3 +150,30 @@ HowTo Start with your own Client:
 HowTo deploy the "Authorization Server" as a redistributable:
 	checkout the "Authorization Server" (MergeModule)
 	select the MergeModule with your .msi editor
+
+Sequence Diagram(s)
+	most simple, valid access-token, first try success
+         CSimulatorPing            AuthorizationServer           Service
+                                      (IAuthorize)
+    -- new --> |
+   -- Init --> |
+               |    -- AuthorizeRequest--> |
+               |                                -- HTTP request --> |
+                                                                    |                              // HTTP Status OK
+
+	simple, renew token, second try success
+         CSimulatorPing            AuthorizationServer           Service        CRenewTokenAsync
+                                      (IAuthorize)
+    -- new --> |
+   -- Init --> |
+               |    -- AuthorizeRequest--> |
+               |                                -- HTTP request --> |
+                                                                    |                              // HTTP Status 401
+                                                                            -- new --> |
+                                                                           -- Init --> |
+
+                                                             -- OnReadyStateChange --> |
+               | <-- Continue --                                                       |
+               |    -- AuthorizeRequest--> |
+               |                                -- HTTP request --> |
+                                                                    |                              // HTTP Status OK

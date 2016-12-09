@@ -32,7 +32,7 @@ public:
 	HRESULT FinalConstruct()
 	{
 		HRESULT hr = NOERROR;
-		ATLTRACE2(atlTraceRefcount, 1, _T("0x%.8x = CRenewTokenAsync::FinalConstruct()\n"), hr);
+		ATLTRACE2(atlTraceRefcount, 0, _T("0x%.8x = CRenewTokenAsync::FinalConstruct()\n"), hr);
 		return hr;
 	}
 
@@ -90,7 +90,7 @@ public:
 
 	void FinalRelease()
 	{
-		ATLTRACE2(atlTraceRefcount, 1, _T("CRenewTokenAsync::FinalRelease()\n"));
+		ATLTRACE2(atlTraceRefcount, 0, _T("CRenewTokenAsync::FinalRelease()\n"));
 	}
 
 	// IXMLDOMDocumentsEvent
@@ -102,8 +102,8 @@ public:
 			ATLTRACE2(atlTraceGeneral, 1, _T("CRenewTokenAsync::IXMLDOMDocumentEvents::OnReadyStateChange() readyState: 0x%.8x\n"), m_spRequest->readyState);
 			switch (m_spRequest->readyState)
 			{
-			case READYSTATE_COMPLETE: // = 4
-			{
+				case READYSTATE_COMPLETE: // = 4
+				{
 /*
 * das hier uebergebene X,Y,Z this hat KEINERLEI funktionale bedeutung und dient lediglich dazu
 * dem progrmierer auf evtl. fehler hinzuweisen.
@@ -117,36 +117,47 @@ public:
 *   m_spAuthorize braucht den m_spRequest weil dort das ergebnis des "Renew" ermittelt wird.
 *   wir (CRenewTokenAsync) brauchen den m_spRequest lediglich um den callback (OnReadyStateChange) zu registrieren bzw. zu deregistrieren.
 */
-				HRESULT hr = m_spAuthorize->raw_UnLockFromRenew();
+					HRESULT hr = m_spAuthorize->raw_UnLockFromRenew();
 
-				// break reference cycle
-				// Remove sink from xml http request
-				m_spRequest->put_onreadystatechange(NULL);
+					// break reference cycle
+					// Remove sink from xml http request
+					m_spRequest->put_onreadystatechange(NULL);
 
-				if (SUCCEEDED(hr))
-				{
-					ATLTRACE2(atlTraceGeneral, 1, _T("  continue previous workflow\n"));
-					m_spRenewCallback->Continue();
+					if (SUCCEEDED(hr))
+					{
+						ATLTRACE2(atlTraceGeneral, 1, _T("  continue previous workflow\n"));
+						// Continue() terminiert den request fuer den fall das er NICHT wiederholt werden konnte.
+						m_spRenewCallback->raw_Continue();
+					}
+					else
+					{
+						ATLTRACE2(atlTraceGeneral, 1, _T("  terminate previous workflow\n"));
+						m_spRenewCallback->raw_Terminate();
+					}
 				}
-				else
-				{
-					ATLTRACE2(atlTraceGeneral, 1, _T("  terminate previous workflow\n"));
-					m_spRenewCallback->Terminate();
-				}
-				m_spRenewCallback = NULL;
-			}
-			break;
+				break;
 
-			case READYSTATE_UNINITIALIZED: // = 0,
-			case READYSTATE_LOADING: // = 1,
-			case READYSTATE_LOADED: // = 2,
-			case READYSTATE_INTERACTIVE: // = 3,
-			default: break;
+				case READYSTATE_UNINITIALIZED: // = 0,
+				case READYSTATE_LOADING: // = 1,
+				case READYSTATE_LOADED: // = 2,
+				case READYSTATE_INTERACTIVE: // = 3,
+				default: break;
 			}
 		}
 		catch (const _com_error& e)
 		{
 			HRESULT hr = e.Error();
+			/*
+			* das ist genau die richtige stelle/anforderung die mit einem EventTrace geloest werden kann
+			* da es sich hier bei CallbackoAuth.h um eine art library handelt sollten die anhaengigkeiten zum project minimal sein
+			* 1.) ich denke da an ein eigenstaendiges CallbackoAuth.man file
+			* 2.) das muss als source file eingehaengt und mit dem build compiliert werden ODER *.res file liefern
+			* 2.) die resourcen muessen natuerlich mit dem installer registriert werden
+			* 3.) das muss zur laufzeit registriert werden
+			* 4.)
+			EventWriteXYZ();
+			*/
+			_ASSERT(FALSE); // kann eigentlich nur noch put_onreadystatechange() sein. aber was tun?
 		}
 
 		Release(); // unlock instance, may the last one
@@ -237,7 +248,8 @@ public:
 *   used by our async sub task
 *
 * Hinweise:
-*   NEVER throw exception across COM boundary
+* - NEVER throw exception across COM boundary
+* - konnte der request NICHT wiederholt werden wird er vollstaendig terminiert
 */
 	STDMETHOD(raw_Continue)()
 	{
@@ -255,11 +267,34 @@ public:
 
 			m_spRequest->setRequestHeader(L"Accept", L"application/xml");
 #endif
-			m_spRequest->send();
-			hr = E_PENDING;
+			/*
+			* mit dem erfolgreichen IXMLHTTPRequest::send() bekomme ich inJEDEM fall ein OnReadyStateChange()
+			* da kann ich dann evtl. fehler/timeout behandeln
+			*/
+			hr = m_spRequest->send();
 		}
 		catch (const _com_error& e) {
+			/*
+			* ich kann mir NICHT vorstellen das jemand eine exception ausloest
+			* und dann KEINEN fehlercode mitliefert aber moeglich ist das natuerlich ...
+			*/
+			_ASSERT(FAILED(e.Error()));
+
+			/*
+			* wurde eine exception ausgeloest so bekomme ich vermutlich KEIN OnReadyStateChange() mehr
+			* ich terminiere den request vollstaendig!
+			*/
+			m_eState = RetryOnce;
+			pThis->onFailed();
+			m_spRequest->put_onreadystatechange(NULL);
+			hr = NOERROR;
+
+			/*
+			* alternativ koennte man das indirekt ueber den NEGATIVEN HRESULT beim aufrufer feststellen und ausfuehren
+			* siehe auch:
+			*   CRenewTokenAsync::IXMLDOMDocumentEvents::OnReadyStateChange()
 			hr = e.Error();
+			*/
 		}
 		return hr;
 	}
@@ -283,7 +318,7 @@ public:
 		switch (m_spRequest->readyState) {
 			case READYSTATE_LOADING:
 				{
-					ATLTRACE2(atlTraceGeneral, 1, _T("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_LOADING\n"), (BSTR)pThis->m_bstrUrl, m_eState);
+					ATLTRACE2(atlTraceGeneral, 0, _T("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_LOADING\n"), (BSTR)pThis->m_bstrUrl, m_eState);
 
 /*
 * siehe auch: kommentar zu
@@ -297,7 +332,7 @@ public:
 				break;
 			case READYSTATE_COMPLETE:
 				{
-					ATLTRACE2(atlTraceGeneral, 1, _T("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: %d\n"), (BSTR)pThis->m_bstrUrl, m_eState, m_spRequest->status);
+					ATLTRACE2(atlTraceGeneral, 0, _T("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: %d\n"), (BSTR)pThis->m_bstrUrl, m_eState, m_spRequest->status);
 
 #ifdef _DEBUG
 /*
