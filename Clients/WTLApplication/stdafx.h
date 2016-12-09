@@ -11,10 +11,13 @@
 #define _WIN32_IE		0x0501
 #define _RICHEDIT_VER	0x0500
 
+// #define FEATURE_TASKSCHD
+
 #include <atlbase.h>
 #include <atlstr.h> // muss VOR atlapp.h
 #include <atlapp.h>
 #include <atlctrls.h>
+#include <ATLComTime.h>
 
 extern CAppModule _Module;
 

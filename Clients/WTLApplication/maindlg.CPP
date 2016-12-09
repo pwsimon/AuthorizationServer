@@ -4,6 +4,14 @@
 #include "..\IWorkflowWebImpl.h"
 #include "SimulatorService.h"
 
+#ifdef FEATURE_TASKSCHD
+// Include the task header file.
+#include <taskschd.h>
+#pragma comment(lib, "taskschd.lib")
+#pragma comment(lib, "comsupp.lib")
+#pragma comment(lib, "credui.lib")
+#endif
+
 #define SLIDER_MIN    0
 #define SLIDER_MAX    5
 #define TIMER_STRESS  1
@@ -21,6 +29,75 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	CTrackBarCtrl ctlTrack(GetDlgItem(IDC_SLIDER));
 	ctlTrack.SetRange(SLIDER_MIN, SLIDER_MAX);
 	m_TimerStressPos = 0;
+
+#ifdef FEATURE_TASKSCHD
+	// access the Scheduler service itself
+	{
+		CComPtr <ITaskService> spService;
+		HRESULT hr = spService.CoCreateInstance(CLSID_TaskScheduler);
+		hr = spService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
+		CComPtr <ITaskFolder> spRootFolder;
+		hr = spService->GetFolder(_bstr_t(L"\\"), &spRootFolder);
+
+		{
+			// query specific task
+			CComPtr <IRegisteredTask> spRegisteredTask;
+			hr = spRootFolder->GetTask(_bstr_t(L"Adobe Acrobat Update Task"), &spRegisteredTask);
+			COleDateTime dtLastRunTime;
+			spRegisteredTask->get_LastRunTime(&dtLastRunTime.m_dt);
+			CString strLastRunTime = dtLastRunTime.Format();
+
+			{
+				// handle actions of this task
+				CComPtr <ITaskDefinition> spTaskDefinition;
+				spRegisteredTask->get_Definition(&spTaskDefinition);
+				CComPtr <IActionCollection> spActionCollection;
+				spTaskDefinition->get_Actions(&spActionCollection);
+
+				long lCount = 0; // state before
+				hr = spActionCollection->get_Count(&lCount);
+
+				// simple action
+				CComQIPtr <IExecAction> spExecAction;
+				{
+					CComPtr <IAction> spAction;
+					spActionCollection->get_Item(0, &spAction);
+					spExecAction = spAction;
+				}
+
+				// Add additional COM Action instead of
+				CComQIPtr <IComHandlerAction> spComHandlerAction;
+				{
+					CComPtr <IAction> spAction;
+					spActionCollection->Create(/*TASK_ACTION_EXEC*/ TASK_ACTION_COM_HANDLER, &spAction);
+					spAction->put_Id(_bstr_t(L"using ECtiClient"));
+
+					spComHandlerAction = spAction;
+					// spComHandlerAction->put_ClassId(_bstr_t(L"{ACA2A1DD-F3B2-4C70-878B-FEEA2B32DDD0}")); // This value must be in the format "{00000000-0000-0000-0000-000000000000}". In .NET, this is the Guid.ToString("B") format and under Win32 use StringFromGUID2.
+				}
+
+				lCount = 0; // state after
+				hr = spActionCollection->get_Count(&lCount);
+
+				// save your chages (persistence)
+				// hr = spTaskDefinition->put_Actions(spActionCollection);
+			}
+		}
+
+		/*
+		class CTaskHandler public ITaskHandler
+		{
+		// ITaskHandler interface, https://msdn.microsoft.com/de-de/library/windows/desktop/aa381370(v=vs.85).aspx
+		STDMETHOD(Pause)() { ATLTRACE_NOTIMPL(); }
+		STDMETHOD(Start)()
+		{
+		GetActiveObject()
+		}
+		}
+		*/
+	}
+#endif
+
 	return TRUE;
 }
 
