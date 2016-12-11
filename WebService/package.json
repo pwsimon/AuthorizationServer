@@ -8,6 +8,7 @@
 		"email": "simon.peter.wolf@gmail.com"
 	},
 	"dependencies": {
-		"connect": "3.5.0"
+		"connect": "3.5.0",
+		"body-parser": "1.15.2"
 	}
 }

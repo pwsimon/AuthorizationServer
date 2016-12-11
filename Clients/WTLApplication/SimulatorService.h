@@ -25,7 +25,8 @@ public:
 
 		// base class, dynamic result
 		// der HTTP Request liefert je nach "Bearer: <token>" ein 200 oder im fall von expired ein 401
-		const HRESULT hr = CCallbackoAuthImpl < CSimulatorPing >::Init(_T("GET"), _T("http://simulatorauthserver-1310.appspot.com/ping"));
+		const HRESULT hr = CCallbackoAuthImpl < CSimulatorPing >::Init(_T("GET"), _T("http://localhost:1310/ping"));
+		// const HRESULT hr = CCallbackoAuthImpl < CSimulatorPing >::Init(_T("GET"), _T("http://simulatorauthserver-1310.appspot.com/ping"));
 		/*
 		* das Init kann schon "synchron" einen fehler liefern.
 		* typischerweise fehlendes bzw. defektes konfigurationsfile fuer den service ODER
@@ -36,7 +37,8 @@ public:
 	}
 
 	HRESULT GetTokenServer(oAuthLib::IAuthorize** ppAuthorize) {
-		const CString strMonikerName = CSimulatorWf::FileMonikerDN4TokenResponse(_T("SimulatorClientId"));
+		const CString strMonikerName = CSimulatorWf::FileMonikerDN4TokenResponse(_T("localNodeJSClientId"));
+		// const CString strMonikerName = CSimulatorWf::FileMonikerDN4TokenResponse(_T("SimulatorClientId"));
 		return CSimulatorWf::GetTokenServerByDisplayName(strMonikerName, ppAuthorize);
 	}
 

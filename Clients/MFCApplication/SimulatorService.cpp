@@ -42,7 +42,7 @@ IMPLEMENT_DYNCREATE(CSimulatorPing, CoAuthServiceCall)
 
 HRESULT CSimulatorPing::Init(LPCTSTR szClientId)
 {
-	return __super::Init(_T("GET"), _T("http://simulatorauthserver.appspot-1310.com/ping"));
+	return __super::Init(_T("GET"), _T("http://simulatorauthserver-1310.appspot.com/ping"));
 }
 
 /*virtual*/ HRESULT CSimulatorPing::GetTokenServer(oAuthLib::IAuthorize** ppAuthorize)
