@@ -16,6 +16,121 @@
 #define SLIDER_MAX    5
 #define TIMER_STRESS  1
 
+#ifdef FEATURE_TASKSCHD
+// access the Scheduler service itself
+HRESULT AllocScheduler(LPCWSTR szFolder, ITaskFolder** ppRootFolder)
+{
+	CComPtr <ITaskService> spService;
+	HRESULT hr = spService.CoCreateInstance(CLSID_TaskScheduler);
+	hr = spService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
+	CComPtr <ITaskFolder> spRootFolder;
+	hr = spService->GetFolder(_bstr_t(szFolder), ppRootFolder);
+	return hr;
+}
+
+HRESULT EnableExistingTask(LPCWSTR szTaskName, VARIANT_BOOL vbEnable, ITaskFolder* pRootFolder)
+{
+	// query specific task
+	_bstr_t bstrTaskName(szTaskName);
+	CComPtr <ITaskDefinition> spTaskDefinition;
+	HRESULT hr = E_FAIL;
+
+	{
+		/*
+		* wirklich wichtig ist die ITaskDefinition und nicht die IRegisteredTask
+		* die ITaskDefinition brauchen wir spaeter um unsere aenderungen zu speichern
+		*/
+		CComPtr <IRegisteredTask> spRTExisting;
+		hr = pRootFolder->GetTask(bstrTaskName, &spRTExisting);
+		hr = spRTExisting->put_Enabled(vbEnable);
+	}
+	return hr;
+}
+
+HRESULT ModifyExistingTask(LPCWSTR szTaskName, ITaskFolder* pRootFolder)
+{
+	// query specific task
+	_bstr_t bstrTaskName(szTaskName);
+	CComPtr <ITaskDefinition> spTaskDefinition;
+	HRESULT hr = E_FAIL;
+
+	{
+		/*
+		* wirklich wichtig ist die ITaskDefinition und nicht die IRegisteredTask
+		* die ITaskDefinition brauchen wir spaeter um unsere aenderungen zu speichern
+		*/
+		CComPtr <IRegisteredTask> spRTExisting;
+		hr = pRootFolder->GetTask(bstrTaskName, &spRTExisting);
+		spRTExisting->get_Definition(&spTaskDefinition);
+
+#ifdef _DEBUG
+		COleDateTime dtLastRunTime;
+		spRTExisting->get_LastRunTime(&dtLastRunTime.m_dt);
+		CString strLastRunTime = dtLastRunTime.Format();
+#endif
+	}
+
+	{
+		CComPtr <IActionCollection> spActionCollection;
+		spTaskDefinition->get_Actions(&spActionCollection);
+
+#ifdef _DEBUG
+		long lCount = 0; // state before
+		hr = spActionCollection->get_Count(&lCount);
+
+		{
+			// query for simple action
+			CComPtr <IAction> spAction;
+			spActionCollection->get_Item(1, &spAction);
+
+			CComQIPtr <IExecAction> spExecAction = spAction;
+		}
+#endif
+
+		{
+			// create additional simple action
+			CComPtr <IAction> spAction;
+			spActionCollection->Create(TASK_ACTION_EXEC, &spAction);
+
+#ifdef _DEBUG
+			lCount = 0; // count after insert/create
+			hr = spActionCollection->get_Count(&lCount);
+#endif
+
+			CComQIPtr <IExecAction> spExecAction = spAction;
+			spExecAction->put_Path(_bstr_t(L"C:\\Users\\psi\\Source\\Repos\\AuthorizationServer\\Debug\\WTLApplication.exe"));
+		}
+
+		/*
+		* save your changes (persistence) by update TaskDefinition
+		* CAUTION:
+		*   needs "Administrative" rights (elevation)
+		*/
+		CComPtr <IRegisteredTask> spRTUpdated;
+		hr = pRootFolder->RegisterTaskDefinition(bstrTaskName, spTaskDefinition, TASK_CREATE_OR_UPDATE, _variant_t(), _variant_t(), TASK_LOGON_INTERACTIVE_TOKEN, _variant_t(), &spRTUpdated);
+	}
+
+	return hr;
+}
+
+HRESULT NewTask(ITaskFolder* pRootFolder, LPCWSTR szTaskName)
+{
+	CComPtr <ITaskService> spService;
+	HRESULT hr = spService.CoCreateInstance(CLSID_TaskScheduler);
+	hr = spService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
+
+	CComPtr <ITaskDefinition> spTaskDefinition;
+	hr = spService->NewTask(0, &spTaskDefinition);
+
+	return hr;
+}
+
+CMainDlg::CMainDlg(LPCTSTR szConfigFile) :
+	m_strConfigFile(szConfigFile)
+{
+}
+#endif
+
 LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	CenterWindow();
@@ -28,79 +143,24 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
 	CTrackBarCtrl ctlTrack(GetDlgItem(IDC_SLIDER));
 	ctlTrack.SetRange(SLIDER_MIN, SLIDER_MAX);
-	m_TimerStressPos = 0;
 
 #ifdef FEATURE_TASKSCHD
-	// access the Scheduler service itself
-	{
-		CComPtr <ITaskService> spService;
-		HRESULT hr = spService.CoCreateInstance(CLSID_TaskScheduler);
-		hr = spService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
-		CComPtr <ITaskFolder> spRootFolder;
-		hr = spService->GetFolder(_bstr_t(L"\\"), &spRootFolder);
-
-		{
-			// query specific task
-			CComPtr <IRegisteredTask> spRegisteredTask;
-			hr = spRootFolder->GetTask(_bstr_t(L"Adobe Acrobat Update Task"), &spRegisteredTask);
-			COleDateTime dtLastRunTime;
-			spRegisteredTask->get_LastRunTime(&dtLastRunTime.m_dt);
-			CString strLastRunTime = dtLastRunTime.Format();
-
-			{
-				// handle actions of this task
-				CComPtr <ITaskDefinition> spTaskDefinition;
-				spRegisteredTask->get_Definition(&spTaskDefinition);
-				CComPtr <IActionCollection> spActionCollection;
-				spTaskDefinition->get_Actions(&spActionCollection);
-
-				long lCount = 0; // state before
-				hr = spActionCollection->get_Count(&lCount);
-
-				// simple action
-				CComQIPtr <IExecAction> spExecAction;
-				{
-					CComPtr <IAction> spAction;
-					spActionCollection->get_Item(0, &spAction);
-					spExecAction = spAction;
-				}
-
-				// Add additional COM Action instead of
-				CComQIPtr <IComHandlerAction> spComHandlerAction;
-				{
-					CComPtr <IAction> spAction;
-					spActionCollection->Create(/*TASK_ACTION_EXEC*/ TASK_ACTION_COM_HANDLER, &spAction);
-					spAction->put_Id(_bstr_t(L"using ECtiClient"));
-
-					spComHandlerAction = spAction;
-					// spComHandlerAction->put_ClassId(_bstr_t(L"{ACA2A1DD-F3B2-4C70-878B-FEEA2B32DDD0}")); // This value must be in the format "{00000000-0000-0000-0000-000000000000}". In .NET, this is the Guid.ToString("B") format and under Win32 use StringFromGUID2.
-				}
-
-				lCount = 0; // state after
-				hr = spActionCollection->get_Count(&lCount);
-
-				// save your chages (persistence)
-				// hr = spTaskDefinition->put_Actions(spActionCollection);
-			}
-		}
-
-		/*
-		class CTaskHandler public ITaskHandler
-		{
-		// ITaskHandler interface, https://msdn.microsoft.com/de-de/library/windows/desktop/aa381370(v=vs.85).aspx
-		STDMETHOD(Pause)() { ATLTRACE_NOTIMPL(); }
-		STDMETHOD(Start)()
-		{
-		GetActiveObject()
-		}
-		}
-		*/
-	}
+	/* CComPtr <ITaskFolder> spRootFolder;
+	HRESULT hr = AllocScheduler(L"\\AuthorisationClient", &spRootFolder);
+	hr = EnableExistingTask(L"WebService Ping", VARIANT_FALSE, spRootFolder);
+	// hr = ModifyExistingTask(L"WebService Ping", spRootFolder);
+	*/
+	if(m_strConfigFile.GetLength())
+		PostMessage(WM_COMMAND, MAKEWPARAM(IDC_RUNPING, 0), 0);
+#else
+	m_TimerStressPos = 0;
 #endif
 
 	return TRUE;
 }
 
+#ifdef FEATURE_TASKSCHD
+#else
 // WM_HSCROLL message, https://msdn.microsoft.com/en-us/library/windows/desktop/bb787575(v=vs.85).aspx
 LRESULT CMainDlg::OnHScroll(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
@@ -180,12 +240,31 @@ void CMainDlg::SetTimerStressPos(int iNewPos)
 			KillTimer(TIMER_STRESS);
 	}
 }
+#endif
+
+LRESULT CMainDlg::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	CSimpleDialog<IDD_ABOUTBOX, FALSE> dlg;
+	dlg.DoModal();
+	return 0;
+}
+
+LRESULT CMainDlg::OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	EndDialog(wID);
+	return 0;
+}
 
 LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	CComObject < CSimulatorPing >* pTask = NULL;
 	HRESULT hr = CComObject < CSimulatorPing >::CreateInstance(&pTask);
+#ifdef FEATURE_TASKSCHD
+	pTask->Load((LPCTSTR) m_strConfigFile, STGM_READ | STGM_SHARE_DENY_WRITE);
+	pTask->Init(m_hWnd);
+#else
 	pTask->Init(GetDlgItem(IDC_STATUS));
+#endif
 
 	return 0;
 }

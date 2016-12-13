@@ -125,13 +125,13 @@ public:
 
 					if (SUCCEEDED(hr))
 					{
-						ATLTRACE2(atlTraceGeneral, 1, _T("  continue previous workflow\n"));
+						ATLTRACE2(atlTraceGeneral, 0, _T("  continue previous workflow\n"));
 						// Continue() terminiert den request fuer den fall das er NICHT wiederholt werden konnte.
 						m_spRenewCallback->raw_Continue();
 					}
 					else
 					{
-						ATLTRACE2(atlTraceGeneral, 1, _T("  terminate previous workflow\n"));
+						ATLTRACE2(atlTraceGeneral, 0, _T("  terminate previous workflow\n"));
 						m_spRenewCallback->raw_Terminate();
 					}
 				}
@@ -204,6 +204,7 @@ public:
 		m_eState = InitialRequest;
 		m_bstrMethod = szMethod;
 		m_bstrUrl = szUrl;
+		_ASSERT(m_bstrUrl.length());
 		ATLTRACE2(atlTraceGeneral, 0, _T("  %ls: %ls (first trial)\n"), (BSTR)m_bstrMethod, (BSTR)m_bstrUrl);
 
 /*

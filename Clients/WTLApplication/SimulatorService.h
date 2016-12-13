@@ -5,28 +5,47 @@ typedef IWorkflowWebImpl < void > CSimulatorWf;
 class ATL_NO_VTABLE CSimulatorPing :
 	public CComObjectRootEx < CComSingleThreadModel >
 	, public CComCoClass < CSimulatorPing >
-	, public IPersistImpl < CSimulatorPing >
+	, public IPersistFile
 	, public CCallbackoAuthImpl < CSimulatorPing >
 {
 public:
 	BEGIN_COM_MAP(CSimulatorPing)
 		COM_INTERFACE_ENTRY(IPersist)
+		COM_INTERFACE_ENTRY(IPersistFile)
 		COM_INTERFACE_ENTRY_CHAIN(CCallbackoAuthImpl < CSimulatorPing >)
 	END_COM_MAP()
 
-#ifdef _DEBUG
-	HRESULT FinalConstruct() { return NOERROR; }
-	void FinalRelease() {}
+#ifdef FEATURE_TASKSCHD
+	HRESULT FinalConstruct()
+	{
+		m_hrLoadConfig = E_PENDING;
+		return NOERROR;
+	}
+
+	void FinalRelease()
+	{
+		if(SUCCEEDED(m_hrLoadConfig))
+			::PostMessage(m_hwndResult, WM_CLOSE, 0, 0);
+	}
+#else
+
+	HRESULT FinalConstruct()
+	{
+		m_hrLoadConfig = E_NOTIMPL;
+		m_strClientId = _T("SimulatorClientId");
+		m_strUrl = _T("http://simulatorauthserver-1310.appspot.com/ping");
+		return NOERROR;
+	}
 #endif
 
+	// C/C++ interface
 	HRESULT Init(HWND hwndResult)
 	{
 		m_hwndResult = hwndResult;
 
 		// base class, dynamic result
 		// der HTTP Request liefert je nach "Bearer: <token>" ein 200 oder im fall von expired ein 401
-		const HRESULT hr = CCallbackoAuthImpl < CSimulatorPing >::Init(_T("GET"), _T("http://localhost:1310/ping"));
-		// const HRESULT hr = CCallbackoAuthImpl < CSimulatorPing >::Init(_T("GET"), _T("http://simulatorauthserver-1310.appspot.com/ping"));
+		const HRESULT hr = CCallbackoAuthImpl < CSimulatorPing >::Init(_T("GET"), m_strUrl);
 		/*
 		* das Init kann schon "synchron" einen fehler liefern.
 		* typischerweise fehlendes bzw. defektes konfigurationsfile fuer den service ODER
@@ -37,8 +56,7 @@ public:
 	}
 
 	HRESULT GetTokenServer(oAuthLib::IAuthorize** ppAuthorize) {
-		const CString strMonikerName = CSimulatorWf::FileMonikerDN4TokenResponse(_T("localNodeJSClientId"));
-		// const CString strMonikerName = CSimulatorWf::FileMonikerDN4TokenResponse(_T("SimulatorClientId"));
+		const CString strMonikerName = CSimulatorWf::FileMonikerDN4TokenResponse((LPCTSTR)m_strClientId);
 		return CSimulatorWf::GetTokenServerByDisplayName(strMonikerName, ppAuthorize);
 	}
 
@@ -48,7 +66,18 @@ public:
 	}
 #else
 	void onSucceeded() {
+#ifdef FEATURE_TASKSCHD
+		/*
+		* wenn die anwendung im BATCH Mode laeuft macht es KEINEN sinn denn:
+		* die anwendung terminiert unmittelbar.
+		* siehe auch:
+		*   FinalRelease()
+		*/
+#else
+		// wenn die anwendung im GUI Mode laeuft setzen wir den statusText
 		::SendMessage(m_hwndResult, WM_SETTEXT, 0, (LPARAM) _T("onSucceeded"));
+#endif
+
 		// die pruefung auf HTTP-Status == 200 (OK )ist die bedingung das hier ueberhaupt onSucceeded() aufgerufen wird
 		ATLTRACE2(atlTraceGeneral, 0, _T("CSimulatorPing::onSucceeded() HTTP Status: 0x%d, %ls\n"), m_spRequest->status, (BSTR)m_spRequest->statusText);
 
@@ -60,7 +89,17 @@ public:
 	void onFailed() {
 		try
 		{
+#ifdef FEATURE_TASKSCHD
+			/*
+			* wenn die anwendung im BATCH Mode laeuft macht es KEINEN sinn denn:
+			* die anwendung terminiert unmittelbar.
+			* siehe auch:
+			*   FinalRelease()
+			*/
+#else
+			// wenn die anwendung im GUI Mode laeuft setzen wir den statusText
 			::SendMessage(m_hwndResult, WM_SETTEXT, 0, (LPARAM)_T("OnFailed"));
+#endif
 
 /*
 * wir muessten hier unterscheiden ob
@@ -116,6 +155,51 @@ public:
 		}
 	}
 
+	// IPersist Interface
+	STDMETHOD(GetClassID)(/* [out] */ __RPC__out CLSID* pClassID)
+	{
+		*pClassID = CSimulatorPing::GetObjectCLSID();
+		return S_OK;
+	}
+
+	// IPersistFile
+	STDMETHOD(IsDirty)(void) { return E_NOTIMPL; }
+	STDMETHOD(Load)(/* [in] */ __RPC__in LPCOLESTR pszFileName, /* [in] */ DWORD dwMode)
+	{
+		m_hrLoadConfig = E_FAIL;
+		/*
+		* %appdata%\WTLApplication.xml
+		* <root>
+		*   <ClientId></ClientId>
+		*   <url></url>
+		*/
+		try
+		{
+			MSXML2::IXMLDOMDocument2Ptr spDoc(__uuidof(MSXML2::DOMDocument60));
+			if (VARIANT_TRUE == spDoc->load(pszFileName))
+			{
+				m_strClientId = (LPCTSTR)MSXML2::IXMLDOMNodePtr(spDoc->documentElement)->selectSingleNode(_bstr_t(L"ClientId"))->text;
+				m_strUrl = (LPCTSTR)MSXML2::IXMLDOMNodePtr(spDoc->documentElement)->selectSingleNode(_bstr_t(L"url"))->text;
+				m_hrLoadConfig = NOERROR;
+				return NOERROR;
+			}
+		}
+		catch (const _com_error& e)
+		{
+			m_strClientId.Empty();
+			m_strUrl.Empty();
+			ATLTRACE2(atlTraceGeneral, 0, _T("CSimulatorPing(unknown)::IPersistFile::Load() FAILED invalid or not found\n"));
+		}
+
+		return m_hrLoadConfig;
+	}
+	STDMETHOD(Save)(/* [unique][in] */ __RPC__in_opt LPCOLESTR pszFileName, /* [in] */ BOOL fRemember) { return E_NOTIMPL; }
+	STDMETHOD(SaveCompleted)(/* [unique][in] */ __RPC__in_opt LPCOLESTR pszFileName) { return E_NOTIMPL; }
+	STDMETHOD(GetCurFile)(/* [out] */ __RPC__deref_out_opt LPOLESTR *ppszFileName) { return E_NOTIMPL; }
+
 private:
 	HWND m_hwndResult;
+	CString m_strClientId;
+	CString m_strUrl;
+	HRESULT m_hrLoadConfig;
 };

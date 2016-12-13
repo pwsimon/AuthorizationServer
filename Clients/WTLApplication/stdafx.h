@@ -11,7 +11,13 @@
 #define _WIN32_IE		0x0501
 #define _RICHEDIT_VER	0x0500
 
-// #define FEATURE_TASKSCHD
+/*
+* das periodische wiederholen auf basis des Task Scheduler (TASK_ACTION_EXEC) bedeutet aktuell u.A.
+* das wir die "geteilten" credentials auch auf ::CreateFile(FILE_SHARE_READ) sperren bzw. aktualisieren koennten ...
+* ganz generell denke ich ist es ausschliesslich sinnvoll mit TASK_ACTION_EXEC nur rein auf BATCH verarbeitung getrimmte anwendungen zu starten.
+* hier kann man dann auch ganz einfach einen returncode einbauen der dann auch im Task Scheduler log auftaucht
+*/
+#define FEATURE_TASKSCHD
 
 #include <atlbase.h>
 #include <atlstr.h> // muss VOR atlapp.h

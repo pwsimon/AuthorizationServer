@@ -110,7 +110,7 @@ public:
 	//   .TokenResponse-user = s 'oAuth.TokenFile.1'
 	// IMoniker::BindToObject method
 	//   https://msdn.microsoft.com/en-us/library/windows/desktop/ms691433(v=vs.85).aspx
-	STDMETHOD(IsDirty)(void) { return E_NOTIMPL;  }
+	STDMETHOD(IsDirty)(void) { return E_NOTIMPL; }
 	STDMETHOD(Load)(/* [in] */ __RPC__in LPCOLESTR pszFileName, /* [in] */ DWORD dwMode);
 	STDMETHOD(Save)(/* [unique][in] */ __RPC__in_opt LPCOLESTR pszFileName, /* [in] */ BOOL fRemember);
 	STDMETHOD(SaveCompleted)(

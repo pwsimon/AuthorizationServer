@@ -13,9 +13,9 @@ var app = connect()
         console.log('INFO: headers.authorization: ' + req.headers.authorization);
 
         res.writeHead(200, {
-            'content-type': 'text/html'
+            'content-type': 'application/xml'
         });
-        res.end('ping result');
+        res.end('<root>ping result</root>');
     })
 
     // The OAuth 2.0 Authorization Framework, https://tools.ietf.org/html/rfc6749#page-16
