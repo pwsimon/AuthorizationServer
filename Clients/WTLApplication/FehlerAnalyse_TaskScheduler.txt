@@ -1,0 +1,16 @@
+09:11:51, 3D0FC240-7662-401E-8F03-F256432D7492, Task triggered by registration,                   // task modified
+09:11:51, 3D0FC240-7662-401E-8F03-F256432D7492, Action started                                    // WTLApplication.exe,
+
+// wieso dauert das jetzt 8 Min., vom "Action started" bis er feststellt das da schon/immer noch eine instance laeuft???
+// 
+09:19:55, 3D0FC240-7662-401E-8F03-F256432D7492, Launch request ignored, instance already running
+
+// ab jetzt versucht (immer die gleiche task) die 
+// der Task Scheduler merkt sich mit "Action started" intern welche prozessID er vergeben hat UND
+// setzt einen watcher auf das ende dieses prozesses
+// d.H. unter anderem das der "Task Scheduler" vom benutzer erzeugte instanzen NICHT kontrollieren kann!
+09:29:56, 3D0FC240-7662-401E-8F03-F256432D7492, Launch request ignored, instance already running
+
+// ich muss wissen warum die instance sich NICHT beendet!
+// ging der request NICHT raus? (evtl. wg. fehlender DesktopSession durch WakeUp) ODER
+// kam KEINE antwort/timeout? (mit einer ungueltigen URL bzw. einem fehlerhaften server testen)

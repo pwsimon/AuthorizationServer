@@ -15,33 +15,45 @@ public:
 		COM_INTERFACE_ENTRY_CHAIN(CCallbackoAuthImpl < CSimulatorPing >)
 	END_COM_MAP()
 
-#ifdef FEATURE_TASKSCHD
 	HRESULT FinalConstruct()
 	{
+		ATLTRACE2(atlTraceRefcount, 0, _T("CSimulatorPing::FinalConstruct()\n"));
 		m_hrLoadConfig = E_PENDING;
+
+		/*
+		* die folgenden member werden durch IPersistFile::Load() aus der config geladen
+		* 1.) eine hard-coded initialisierung macht vermutlich nur fuer den fall sinn das KEIN configfile auf der commandline uebergeben wurde
+		* 2.) eine hard-coded initialisierung macht vermutlich erst sinn wenn im IPersistFile::Load() festgestellt wurde das die configfile ungueltig war/ist
+		*     aktuell wird IPersistFile::Load() nur garantiert wenn eine commandline uebergeben wurde
+		*     was machen wir bei einem klassischen start per doppelclick???
+		*/
+		m_strClientId = _T("SimulatorClientId");
+		m_strUrl = _T("http://simulatorauthserver-1310.appspot.com/ping");
 		return NOERROR;
 	}
 
 	void FinalRelease()
 	{
+		ATLTRACE2(atlTraceRefcount, 0, _T("CSimulatorPing::FinalRelease()\n"));
+
+#ifdef FEATURE_TASKSCHD
+		/*
+		* wenn die anwendung fuer "BatchMode" compiliert wurde
+		* soll sie mit dem finish des ersten request, egal ob succeeded/failed, terminieren
+		*/
 		if(SUCCEEDED(m_hrLoadConfig))
 			::PostMessage(m_hwndResult, WM_CLOSE, 0, 0);
-	}
 #else
-
-	HRESULT FinalConstruct()
-	{
-		m_hrLoadConfig = E_NOTIMPL;
-		m_strClientId = _T("SimulatorClientId");
-		m_strUrl = _T("http://simulatorauthserver-1310.appspot.com/ping");
-		return NOERROR;
-	}
 #endif
+	}
 
 	// C/C++ interface
 	HRESULT Init(HWND hwndResult)
 	{
 		m_hwndResult = hwndResult;
+#ifdef MONITOR_PENDING_REQUESTS
+		::SendMessage(m_hwndResult, WM_USER + 0x10, 2, (LPARAM) this);
+#endif
 
 		// base class, dynamic result
 		// der HTTP Request liefert je nach "Bearer: <token>" ein 200 oder im fall von expired ein 401
@@ -60,22 +72,20 @@ public:
 		return CSimulatorWf::GetTokenServerByDisplayName(strMonikerName, ppAuthorize);
 	}
 
+#ifdef MONITOR_PENDING_REQUESTS
+	HRESULT Abort() {
+		return m_spRequest->abort();
+	}
+#endif
+
 #ifdef AUTHORIZATION_SERVER_SUPPORT_JSON
 	void onSucceeded(const Json::Value& jsonRepCon) {
 		ATLTRACE2(atlTraceGeneral, 0, _T("CSimulatorPing::onSucceeded()\n"));
 	}
 #else
 	void onSucceeded() {
-#ifdef FEATURE_TASKSCHD
-		/*
-		* wenn die anwendung im BATCH Mode laeuft macht es KEINEN sinn denn:
-		* die anwendung terminiert unmittelbar.
-		* siehe auch:
-		*   FinalRelease()
-		*/
-#else
-		// wenn die anwendung im GUI Mode laeuft setzen wir den statusText
-		::SendMessage(m_hwndResult, WM_SETTEXT, 0, (LPARAM) _T("onSucceeded"));
+#ifdef MONITOR_PENDING_REQUESTS
+		::SendMessage(m_hwndResult, WM_USER + 0x10, 0, (LPARAM) this);
 #endif
 
 		// die pruefung auf HTTP-Status == 200 (OK )ist die bedingung das hier ueberhaupt onSucceeded() aufgerufen wird
@@ -89,16 +99,8 @@ public:
 	void onFailed() {
 		try
 		{
-#ifdef FEATURE_TASKSCHD
-			/*
-			* wenn die anwendung im BATCH Mode laeuft macht es KEINEN sinn denn:
-			* die anwendung terminiert unmittelbar.
-			* siehe auch:
-			*   FinalRelease()
-			*/
-#else
-			// wenn die anwendung im GUI Mode laeuft setzen wir den statusText
-			::SendMessage(m_hwndResult, WM_SETTEXT, 0, (LPARAM)_T("OnFailed"));
+#ifdef MONITOR_PENDING_REQUESTS
+			::SendMessage(m_hwndResult, WM_USER + 0x10, 1, (LPARAM) this);
 #endif
 
 /*

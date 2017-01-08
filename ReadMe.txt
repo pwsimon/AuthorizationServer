@@ -177,3 +177,312 @@ Sequence Diagram(s)
                |    -- AuthorizeRequest--> |
                |                                -- HTTP request --> |
                                                                     |                              // HTTP Status OK
+
+--------------------------------------------------------------------------
+Fazit:
+  der ERSTE XMLHTTPRequest failed
+  egal ob "Msxml2.ServerXMLHTTP.6.0" oder "Msxml2.ServerXMLHTTP.6.0"
+  egal ob active management  Suspend/Resume-Application
+  naechster versuch manual keep track for pending requests
+  naechster versuch "winhttpcom.dll"
+
+Analyse: "Msxml2.ServerXMLHTTP.6.0" active mit Suspend/Restart-Application durch OnPowerBroadcast
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 29.12.2016 12:56:36, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+
+// der Benutzer sperrt den Bildschirm 12:57 Uhr (die anwendung laeuft weiter)
+\wtlapplication\maindlg.cpp(211) : atlTraceGeneral -   CMainDlg::OnWTSSessionChange() WTS_SESSION_LOCK, 29.12.2016 12:57:00
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 29.12.2016 12:57:01, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 401
+\callbackoauth.h(36) : atlTraceRefcount - 0x00000000 = CRenewTokenAsync::FinalConstruct()
+\callbackoauth.h(129) : atlTraceGeneral -   continue previous workflow
+\callbackoauth.h(276) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (retry once)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 1, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(94) : atlTraceRefcount - CRenewTokenAsync::FinalRelease()
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 1, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 1, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 1, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 29.12.2016 13:02:01, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+
+// Suspend durch den Rechner 13:02 Uhr
+//   SuspendApplication()
+\wtlapplication\maindlg.cpp(246) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000004, WTS_CONNECTSTATE_CLASS: 0x00000000
+\wtlapplication\maindlg.cpp(268) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() PBT_APMSUSPEND, 29.12.2016 13:02:18
+
+// WakeUp durch den User 08:36 Uhr
+//   ResumeApplication()
+\wtlapplication\maindlg.cpp(246) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000012, WTS_CONNECTSTATE_CLASS: 0x00000000
+\wtlapplication\maindlg.cpp(282) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() PBT_APMRESUMEAUTOMATIC, 30.12.2016 08:36:33
+\wtlapplication\maindlg.cpp(246) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000007, WTS_CONNECTSTATE_CLASS: 0x00000000
+\wtlapplication\maindlg.cpp(293) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() wParam: 0x00000007, 30.12.2016 08:36:33
+
+// ERSTER Timer nach ResumeApplication() offensichtlich KEINE Response
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:36:58, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+
+// ZWEITER Timer nach ResumeApplication() jetzt gehts
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:37:23, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 401
+\callbackoauth.h(36) : atlTraceRefcount - 0x00000000 = CRenewTokenAsync::FinalConstruct()
+\callbackoauth.h(129) : atlTraceGeneral -   continue previous workflow
+\callbackoauth.h(276) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (retry once)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 1, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(94) : atlTraceRefcount - CRenewTokenAsync::FinalRelease()
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 1, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 1, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 1, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+
+// normal continue
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:37:48, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:38:13, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:38:38, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:39:03, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:39:28, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:39:53, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:40:18, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:40:43, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:41:09, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:41:34, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 08:41:59, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+
+// Suspend 08:42 Uhr
+\wtlapplication\maindlg.cpp(246) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000004, WTS_CONNECTSTATE_CLASS: 0x00000000
+\wtlapplication\maindlg.cpp(268) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() PBT_APMSUSPEND, 30.12.2016 08:42:03
+
+// WakeUp durch den User 08:59 Uhr
+//   ResumeApplication()
+\wtlapplication\maindlg.cpp(246) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000012, WTS_CONNECTSTATE_CLASS: 0x00000000
+\wtlapplication\maindlg.cpp(282) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() PBT_APMRESUMEAUTOMATIC, 30.12.2016 08:59:38
+\wtlapplication\maindlg.cpp(246) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000007, WTS_CONNECTSTATE_CLASS: 0x00000000
+\wtlapplication\maindlg.cpp(293) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() wParam: 0x00000007, 30.12.2016 08:59:38
+
+// ERSTER Timer nach ResumeApplication() offensichtlich KEINE Response
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 09:00:03, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+
+\wtlapplication\maindlg.cpp(214) : atlTraceGeneral -   CMainDlg::OnWTSSessionChange() WTS_SESSION_UNLOCK, 30.12.2016 09:00:17
+
+// ZWEITER Timer nach ResumeApplication() jetzt gehts
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 09:00:28, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 09:00:53, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 09:01:18, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+\wtlapplication\maindlg.cpp(416) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 30.12.2016 09:01:43, TIMER_STRESS
+\wtlapplication\simulatorservice.h(20) : atlTraceRefcount - CSimulatorPing::FinalConstruct()
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(82) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\simulatorservice.h(37) : atlTraceRefcount - CSimulatorPing::FinalRelease()
+
+--------------------------------------------------------------------------
+Analyse: "Msxml2.ServerXMLHTTP.6.0" active mit Suspend/Restart-Application durch OnPowerBroadcast
+\wtlapplication\maindlg.cpp(393) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 28.12.2016 14:12:58, POWERBROADCAST_TEST
+\wtlapplication\maindlg.cpp(389) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 28.12.2016 14:13:42, TIMER_STRESS
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(88) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\maindlg.cpp(393) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 28.12.2016 14:13:58, POWERBROADCAST_TEST
+\wtlapplication\maindlg.cpp(389) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 28.12.2016 14:14:07, TIMER_STRESS
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(88) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\maindlg.cpp(389) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 28.12.2016 14:14:32, TIMER_STRESS
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(88) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\maindlg.cpp(389) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 28.12.2016 14:14:57, TIMER_STRESS
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(88) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK
+\wtlapplication\maindlg.cpp(393) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0xffffffff, 28.12.2016 14:14:58, POWERBROADCAST_TEST
+
+// Suspend 14:15 Uhr (die anwendung laeuft weiter)
+\wtlapplication\maindlg.cpp(203) : atlTraceGeneral -   CMainDlg::OnWTSSessionChange() WTS_SESSION_LOCK, 28.12.2016 14:15:18
+\wtlapplication\maindlg.cpp(238) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000004, WTS_CONNECTSTATE_CLASS: 0x00000000
+
+
+\wtlapplication\maindlg.cpp(260) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() PBT_APMSUSPEND, 28.12.2016 14:15:18
+\wtlapplication\maindlg.cpp(238) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000012, WTS_CONNECTSTATE_CLASS: 0x00000000
+
+// WakeUp durch den User 14:23 Uhr
+//   ResumeApplication()
+\wtlapplication\maindlg.cpp(274) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() PBT_APMRESUMEAUTOMATIC, 28.12.2016 14:23:31
+\wtlapplication\maindlg.cpp(238) : atlTraceGeneral - Enter CMainDlg::OnPowerBroadcast() wParam: 0x00000007, WTS_CONNECTSTATE_CLASS: 0x00000000
+\wtlapplication\maindlg.cpp(285) : atlTraceGeneral - CMainDlg::OnPowerBroadcast() wParam: 0x00000007, 28.12.2016 14:23:31
+
+// ERSTER Timer nach ResumeApplication() offensichtlich KEINE Response
+\wtlapplication\maindlg.cpp(389) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 28.12.2016 14:23:56, TIMER_STRESS
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+
+// nach dem WakeUp kommt zwangslaeufig/irgendwannmal auch ein Unlock 14:24 Uhr
+// stellt sich die frage liegt das am WTS_SESSION_UNLOCK das die anwendung auf einmal wieder laeuft???
+\wtlapplication\maindlg.cpp(206) : atlTraceGeneral -   CMainDlg::OnWTSSessionChange() WTS_SESSION_UNLOCK, 28.12.2016 14:24:06
+
+// ZWEITER Timer nach ResumeApplication() jetzt gehts
+\wtlapplication\maindlg.cpp(389) : atlTraceGeneral -   CMainDlg::OnTimer() m_PowerBroadcast: 0x00000007, 28.12.2016 14:24:21, TIMER_STRESS
+\callbackoauth.h(222) : atlTraceGeneral -   GET: http://simulatorauthserver-1310.appspot.com/ping (first trial)
+\callbackoauth.h(336) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_LOADING
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 2
+\callbackoauth.h(466) : atlTraceGeneral -   logical state: 0, m_spRequest->readyState: 3
+\callbackoauth.h(350) : atlTraceGeneral - CCallbackoAuthImpl<T>(http://simulatorauthserver-1310.appspot.com/ping)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: 0, m_spRequest->readyState: READYSTATE_COMPLETE, HTTP-Status: 200
+\wtlapplication\simulatorservice.h(88) : atlTraceGeneral - CSimulatorPing::onSucceeded() HTTP Status: 0x200, OK

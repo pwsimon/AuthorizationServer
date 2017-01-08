@@ -2,6 +2,7 @@
 
 #ifdef _DEBUG
 	#include <Wtsapi32.h>
+	#include <MsXml2.h>
 #endif
 
 #define ID_XMLHTTPREQUESTEVENTS  1
@@ -193,7 +194,20 @@ public:
 	HRESULT Init(LPCTSTR szMethod, LPCTSTR szUrl) {
 		T* pThis = static_cast<T*>(this);
 		_ASSERT(NULL == m_spRequest); // initalize only once
+
 		m_spRequest.CreateInstance(XMLHTTP_COMPONENT);
+
+		/*
+		* unter verwendung von: IServerXMLHTTPRequest, https://msdn.microsoft.com/en-us/library/ms754586(v=vs.85).aspx
+		* kommt es bei einem nicht verfuegbaren server der mittels localhost adressiert wird NIEMALS zu einem timeout oder einem anderen auswertbaren fehler???
+		* ERGO OHNE eine uebergeordnete logik wird die anwendung NICHT terminieren (sie wartet ewig)
+		*/
+		MSXML2::IServerXMLHTTPRequestPtr spServerRequest(m_spRequest);
+		if (spServerRequest)
+		{
+			// spServerRequest->setOption(MSXML2::SXH_OPTION_URL, L"");
+			spServerRequest->setTimeouts(5 * 1000, 5 * 1000, 5 * 1000, 5 * 1000);
+		}
 
 		// add sink to xml http request
 		IDispatchPtr spSink;
@@ -449,7 +463,7 @@ public:
 				}
 				break;
 			default:
-				ATLTRACE2(atlTraceGeneral, 1, _T("  logical state: %d, m_spRequest->readyState: %d\n"), m_eState, m_spRequest->readyState);
+				ATLTRACE2(atlTraceGeneral, 0, _T("  logical state: %d, m_spRequest->readyState: %d\n"), m_eState, m_spRequest->readyState);
 				break;
 		}
 		Release(); // unlock your instance

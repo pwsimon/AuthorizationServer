@@ -33,17 +33,23 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	int nRet = 0;
 	// BLOCK: Run application
 	{
-#ifdef FEATURE_TASKSCHD
 		CMainDlg dlgMain(lpstrCmdLine);
-
-#else
-		CMainDlg dlgMain;
-#endif
 		nRet = dlgMain.DoModal();
+#ifdef FEATURE_TASKSCHD
+		/*
+		* wenn ich den returnCode von DoModal() uebernehmen wollte muesste ich JEDEN exit ueberschreiben
+		* damit ICH den wert von EndDialog() kontrollieren kann. OnCancel(), OnOk(), OnClose() is mir zuviel
+		*/
+		nRet = dlgMain.m_iExitCode;
+		ATLTRACE2(atlTraceGeneral, 0, _T("0x%.8x = _tWinMain()\n"), nRet);
+#endif
 	}
 
 	_Module.Term();
 	::CoUninitialize();
 
+#ifdef FEATURE_TASKSCHD
+	::ExitProcess(nRet);
+#endif
 	return nRet;
 }

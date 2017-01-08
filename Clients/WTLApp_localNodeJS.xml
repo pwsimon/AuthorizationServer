@@ -4,6 +4,6 @@
 		Template: %appdata%\\client_secret_<ClientId>.TokenResponse-user
 		Template: %appdata%\\client_secret_<ClientId>.json
 	-->
-	<ClientId>localNodeJS</ClientId>
+	<ClientId>localNodeJSClientId</ClientId>
 	<url>http://localhost:1310/ping</url>
 </root>

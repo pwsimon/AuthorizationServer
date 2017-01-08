@@ -232,6 +232,11 @@ STDMETHODIMP CTokenFile::LockForRenew(
 		// m_spLockForRenew.CreateInstance(__uuidof(MSXML2::XMLHTTP40)); // for use with Fiddler
 		// m_spLockForRenew.CreateInstance(__uuidof(MSXML2::ServerXMLHTTP40)); // for use with WTSDisconnected
 		m_spLockForRenew.CreateInstance(XMLHTTP_COMPONENT); // reduce dependencies of foreign components
+		// IServerXMLHTTPRequest, https://msdn.microsoft.com/en-us/library/ms754586(v=vs.85).aspx
+		MSXML2::IServerXMLHTTPRequestPtr spServerRequest(m_spLockForRenew);
+		if (spServerRequest)
+			spServerRequest->setTimeouts(5 * 1000, 5 * 1000, 5 * 1000, 5 * 1000);
+
 		ATLTRACE2(atlTraceGeneral, 0, _T("  POST: %s\n"), (LPCTSTR)m_strTokenUri);
 		m_spLockForRenew->open(L"POST", (LPCTSTR)m_strTokenUri, VARIANT_TRUE); // "https://webapi.teamviewer.com/api/v1/oauth2/token"
 
