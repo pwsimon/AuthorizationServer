@@ -74,7 +74,8 @@ STDMETHODIMP CTokenFile::Load(
 	/* [in] */ __RPC__in LPCOLESTR pszFileName,
 	/* [in] */ DWORD dwMode)
 {
-	ATLTRACE2(atlTraceRefcount, 0, _T("CTokenFile(%ls)::IPersistFile::Load()\n"), pszFileName);
+	// TracePointDef: CTokenFile({pszFileName})::IPersistFile::Load()
+	// Labels/Keywords: 
 
 	try
 	{
