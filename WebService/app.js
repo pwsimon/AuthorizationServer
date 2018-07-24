@@ -1,16 +1,24 @@
 var http = require('http');
 var connect = require('connect');
 
-// parse urlencoded request bodies into req.body 
+// parse urlencoded request bodies into req.body
 var bodyParser = require('body-parser');
 
 var app = connect()
     .use(bodyParser.urlencoded({ extended: false }))
 
-    // dieser aufruf ist der CORE und ist letztlich der einzig funktionale part 
+/*
+* dieser aufruf ist der CORE und ist letztlich der einzig funktionale part.
+* Funktional:
+* das hier gelieferte "Bearer" token ist letztlich einfach ein (ISO 8601, String) Zeitstempel.
+* wenn dieser Zeitstempel aelter als 5 Minuten ist liefern wir ein HTTP 401 und erwarten ein "Aktualisieren der Zugriffstoken" (grant_type=refresh_token)
+*   https://docs.microsoft.com/de-de/azure/active-directory/develop/active-directory-protocols-oauth-code#refreshing-the-access-tokens
+*/
     .use('/ping', function(req, res) {
         // Message Headers, https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
-        console.log('INFO: headers.authorization: ' + req.headers.authorization);
+        console.log('INFO: headers.authorization:', req.headers.authorization);
+        var dtBearer = new Date(req.headers.authorization.substring(7));
+        console.log('bearer:', dtBearer);
 
         res.writeHead(200, {
             'content-type': 'application/xml'
