@@ -2,7 +2,7 @@
 <Wix
 	xmlns="http://schemas.microsoft.com/wix/2006/wi"
 	xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-	<Product Id="*" Name="AuthorizationServer" Language="1033" Version="0.99.0.0" Manufacturer="pwsimon" UpgradeCode="83ef299d-d978-4ba8-9fe5-fc78e344a755">
+	<Product Id="*" Name="AuthorizationServer" Language="1033" Version="0.99.0.1" Manufacturer="pwsimon" UpgradeCode="83ef299d-d978-4ba8-9fe5-fc78e344a755">
 		<Package InstallerVersion="405" Compressed="yes" InstallScope="perMachine" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -12,7 +12,7 @@
 		<!--
 			hier brauch ich noch eine custom action und ein cURL.exe tool
 				Binary Element, http://wixtoolset.org/documentation/manual/v3/xsd/wix/binary.html
-			mit dem InstallFinalize soll dadurch ein token abgeholt und als client_secret_SimulatorClientId.TokenResponse-user persistiert werden
+			mit dem InstallFinalize soll dadurch ein token abgeholt und als client_secret_localNodeJSClientId.TokenResponse-user persistiert werden
 			damit wird das statische file TokenResponseJSON obsolet
 		-->
 		<Binary Id='cURLEXE' SourceFile='curl.exe' />
@@ -24,7 +24,7 @@
 		<CustomAction Id='cURLFile'
 			BinaryKey='cURLEXE'
 			Execute='commit'
-			ExeCommand='-d "grant_type=authorization_code" -o "[AppDataFolder]\client_secret_SimulatorClientId.TokenResponse-user" http://simulatorauthserver-1310.appspot.com/token'
+			ExeCommand='-d "grant_type=authorization_code" -o "[AppDataFolder]\client_secret_localNodeJSClientId.TokenResponse-user" http://localhost:1310/token'
 			Return='asyncNoWait' />
 
 		<!-- InstallExecuteSequence Element, http://wixtoolset.org/documentation/manual/v3/xsd/wix/installexecutesequence.html -->
@@ -82,7 +82,7 @@
 				<RegistryKey Root="HKCU" Key="AuthorizationServer">
 					<RegistryValue Type="integer" Value="1" KeyPath="yes" />
 				</RegistryKey>
-				<File Id='ClientSecretJSON' Name='client_secret_SimulatorClientId.json' DiskId='1' Source='$(env.AppData)\client_secret_SimulatorClientId.json' />
+				<File Id='ClientSecretJSON' Name='client_secret_localNodeJSClientId.json' DiskId='1' Source='$(env.AppData)\client_secret_localNodeJSClientId.json' />
 			</Component>
 		</ComponentGroup>
 	</Fragment>
