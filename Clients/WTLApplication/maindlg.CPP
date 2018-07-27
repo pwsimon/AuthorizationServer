@@ -163,8 +163,9 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	// hr = ModifyExistingTask(L"WebService Ping", spRootFolder);
 	*/
 
-	if(m_strConfigFile.GetLength())
+	/* if(m_strConfigFile.GetLength())
 		PostMessage(WM_COMMAND, MAKEWPARAM(IDC_RUNPING, 0), 0);
+	*/
 
 	/*
 	* fuer einen kurzen test wakeup mit TaskScheduler beenden wir uns einfach und fuehren KEINEN ping durch
