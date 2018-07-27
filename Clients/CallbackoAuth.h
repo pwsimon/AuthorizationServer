@@ -219,10 +219,12 @@ public:
 		m_bstrMethod = szMethod;
 		m_bstrUrl = szUrl;
 		_ASSERT(m_bstrUrl.length());
-		ATLTRACE2(atlTraceGeneral, 0, _T("  %ls: %ls (first trial)\n"), (BSTR)m_bstrMethod, (BSTR)m_bstrUrl);
 
 /*
 * hier laeuft schon der erste (synchrone) Callback (OnReadStateChange(READYSTATE_LOADING))
+*
+* TracePointDef: {m_bstrMethod}, {m_bstrUrl} (first trial)
+* Labels/Keywords:
 */
 		CComVariant varAsync(VARIANT_TRUE);
 		m_spRequest->open(m_bstrMethod, m_bstrUrl, varAsync);
@@ -333,12 +335,13 @@ public:
 		switch (m_spRequest->readyState) {
 			case READYSTATE_LOADING:
 				{
-					ATLTRACE2(atlTraceGeneral, 0, _T("CCallbackoAuthImpl<T>(%ls)::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: %d, m_spRequest->readyState: READYSTATE_LOADING\n"), (BSTR)pThis->m_bstrUrl, m_eState);
-
 /*
 * siehe auch: kommentar zu
 *   CCallbackoAuthImpl<T>::m_bstrAccessToken UND
 *   IWorkflow::AuthorizeRequest
+*
+* TracePointDef: CCallbackoAuthImpl<T>({pThis->m_bstrUrl})::IXMLDOMDocumentsEvent::OnReadyStateChange() logical state: {m_eState}, m_spRequest->readyState: READYSTATE_LOADING
+* Labels/Keywords:
 */
 					oAuthLib::IAuthorizePtr spAuthorize;
 					if (SUCCEEDED(pThis->GetTokenServer(&spAuthorize)))
@@ -463,7 +466,11 @@ public:
 				}
 				break;
 			default:
-				ATLTRACE2(atlTraceGeneral, 0, _T("  logical state: %d, m_spRequest->readyState: %d\n"), m_eState, m_spRequest->readyState);
+				{
+				// TracePointDef: logical state: {m_eState}, m_spRequest->readyState: {m_spRequest->readyState}
+				// Labels/Keywords: 
+				const HRESULT _hr = NOERROR;
+				}
 				break;
 		}
 		Release(); // unlock your instance

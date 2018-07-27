@@ -194,8 +194,9 @@ STDMETHODIMP CTokenFile::AuthorizeRequest(
 	CString strAuthorization;
 	strAuthorization.Format(_T("%s %s"), (LPCTSTR)m_strTokenType, (LPCTSTR)m_strAccessToken);
 	HRESULT hr = spXMLHttp->setRequestHeader(L"Authorization", (LPCTSTR)strAuthorization);
-	ATLTRACE2(atlTraceGeneral, 0, _T("  CTokenFile(%s)::IAuthorize::AuthorizeRequest() Authorization: %s\n"), m_strClientId, strAuthorization);
-	ATLTRACE2(atlTraceGeneral, 1, _T("0x%.8x = CTokenFile::IAuthorize::AuthorizeRequest()\n"), hr);
+
+	// TracePointDef: CTokenFile({m_strClientId})::IAuthorize::AuthorizeRequest() Authorization: {strAuthorization}
+	// Labels/Keywords: AuthorizeServer
 	*pbstrAccessToken = m_strAccessToken.AllocSysString();
 	return hr;
 }
@@ -238,7 +239,8 @@ STDMETHODIMP CTokenFile::LockForRenew(
 		if (spServerRequest)
 			spServerRequest->setTimeouts(5 * 1000, 5 * 1000, 5 * 1000, 5 * 1000);
 
-		ATLTRACE2(atlTraceGeneral, 0, _T("  POST: %s\n"), (LPCTSTR)m_strTokenUri);
+		// TracePointDef: POST: {m_strTokenUri}
+		// Labels/Keywords: 
 		m_spLockForRenew->open(L"POST", (LPCTSTR)m_strTokenUri, VARIANT_TRUE); // "https://webapi.teamviewer.com/api/v1/oauth2/token"
 
 		// Header: L"Content-Type"
