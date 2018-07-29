@@ -187,12 +187,14 @@ HRESULT CoAuthServiceCall::Init(LPCTSTR szMethod, LPCTSTR szUrl)
 	m_pRenewTokenAsync = NULL;
 	m_bstrMethod = szMethod;
 	m_bstrUrl = szUrl;
-	TRACE2("  %s: %s (first trial)\n", szMethod, szUrl);
 
 /*
 * hier laeuft schon der erste (synchrone) Callback (OnReadStateChange(READYSTATE_LOADING))
 * ungluecklicherweise koennen wir fuer den fall das der IWorkflow::AuthorizeRequest() failed KEINEN returnwert/exception liefern
 * ergo wird das IXMLHTTPRequest::send() unbedingt nachgeschoben. das heist wir muessen spaeter evtl. auf den falschen fehler 401 reagieren.
+*
+* TracePointDef: {szMethod}: {szUrl} (first trial)
+* Labels/Keywords:
 */
 	CComVariant varAsync(VARIANT_TRUE);
 	m_spRequest->open(m_bstrMethod, m_bstrUrl, varAsync);

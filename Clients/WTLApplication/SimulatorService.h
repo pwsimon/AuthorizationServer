@@ -88,7 +88,11 @@ public:
 		::SendMessage(m_hwndResult, WM_USER + 0x10, 0, (LPARAM) this);
 #endif
 
-		// die pruefung auf HTTP-Status == 200 (OK )ist die bedingung das hier ueberhaupt onSucceeded() aufgerufen wird
+		/*
+		* die pruefung auf HTTP-Status == 200 (OK )ist die bedingung das hier ueberhaupt onSucceeded() aufgerufen wird
+		* TracePointDef: CSimulatorPing::onSucceeded() HTTP Status: {m_spRequest->status}, {m_spRequest->statusText}
+		* Labels/Keywords: 
+		*/
 		ATLTRACE2(atlTraceGeneral, 0, _T("CSimulatorPing::onSucceeded() HTTP Status: 0x%d, %ls\n"), m_spRequest->status, (BSTR)m_spRequest->statusText);
 
 		MSXML2::IXMLDOMDocument2Ptr spXML(m_spRequest->responseXML);
