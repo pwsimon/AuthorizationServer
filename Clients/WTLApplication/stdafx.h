@@ -106,7 +106,7 @@ extern CAppModule _Module;
 // #define XMLHTTP_COMPONENT "Msxml2.XMLHTTP.6.0"
 // #define XMLHTTP_COMPONENT __uuidof(MSXML2::ServerXMLHTTP60)
 
-// the "AuthrizationServer" itself
+// the "AuthorizationServer" itself
 #ifdef _DEBUG
 #import "..\..\Debug\oAuth.tlb"
 #else

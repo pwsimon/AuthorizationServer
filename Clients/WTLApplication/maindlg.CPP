@@ -128,6 +128,9 @@ HRESULT NewTask(ITaskFolder* pRootFolder, LPCWSTR szTaskName)
 
 CMainDlg::CMainDlg(LPCTSTR szConfigFile) :
 	m_strConfigFile(szConfigFile),
+#ifdef FEATURE_TASKSCHD
+	m_iExitCode(0),
+#endif
 #ifdef POWERBROADCAST_TEST
 	m_timerPowerBroadcast(0),
 #endif
@@ -163,9 +166,8 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	// hr = ModifyExistingTask(L"WebService Ping", spRootFolder);
 	*/
 
-	/* if(m_strConfigFile.GetLength())
+	if(m_strConfigFile.GetLength())
 		PostMessage(WM_COMMAND, MAKEWPARAM(IDC_RUNPING, 0), 0);
-	*/
 
 	/*
 	* fuer einen kurzen test wakeup mit TaskScheduler beenden wir uns einfach und fuehren KEINEN ping durch
@@ -334,7 +336,9 @@ LRESULT CMainDlg::OnRequest(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /
 	* CoAuthServiceCall::onSucceeded() -> CMainDlg::WM_USER + 0x10, wParam -> ::ExitCode(<number>)
 	* den liefern wir im batch mode auch als exit code
 	*/
+#ifdef FEATURE_TASKSCHD
 	m_iExitCode = wParam;
+#endif
 	switch (wParam)
 	{
 		case 0: // auf ebene ExitCode ist 0 typisch fuer succeeded
