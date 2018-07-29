@@ -585,7 +585,7 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 	}
 #endif
 
-#if 1
+#ifdef XMLHTTP_FREETHREADEDXMLHTTP60
 	class ATL_NO_VTABLE CMyCallback :
 		  public CComObjectRootEx < CComSingleThreadModel >
 		, public MSXML2::IXMLHTTPRequest2Callback

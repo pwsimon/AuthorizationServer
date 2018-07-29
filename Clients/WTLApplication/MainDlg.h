@@ -64,7 +64,9 @@ public:
 #endif
 
 private:
+#ifdef XMLHTTP_FREETHREADEDXMLHTTP60
 	MSXML2::IXMLHTTPRequest2Ptr m_spRequest2;
+#endif
 	CString m_strConfigFile;
 	int m_TimerStressPos; // current value;
 	BOOL m_bRegisterSessionNotification;
