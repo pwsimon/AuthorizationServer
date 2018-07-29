@@ -585,7 +585,7 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 	}
 #endif
 
-#if 0
+#if 1
 	class ATL_NO_VTABLE CMyCallback :
 		  public CComObjectRootEx < CComSingleThreadModel >
 		, public MSXML2::IXMLHTTPRequest2Callback
@@ -594,27 +594,65 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 			COM_INTERFACE_ENTRY(MSXML2::IXMLHTTPRequest2Callback)
 		END_COM_MAP()
 
-		STDMETHOD(raw_OnRedirect) (MSXML2::IXMLHTTPRequest2* pXHR, LPWSTR pwszRedirectUrl) { return E_NOTIMPL; }
-		STDMETHOD(raw_OnHeadersAvailable)(MSXML2::IXMLHTTPRequest2* pXHR, unsigned long dwStatus, LPWSTR pwszStatus) { return E_NOTIMPL; }
-		STDMETHOD(raw_ondataavailable)(MSXML2::IXMLHTTPRequest2* pXHR, struct ISequentialStream* pResponseStream) { return E_NOTIMPL; }
-		STDMETHOD(raw_OnResponseReceived)(MSXML2::IXMLHTTPRequest2* pXHR, struct ISequentialStream* pResponseStream) { return E_NOTIMPL; }
-		STDMETHOD(raw_OnError)(MSXML2::IXMLHTTPRequest2* pXHR, HRESULT hrError) { return E_NOTIMPL; }
+		// IXMLHTTPRequest2Callback implementation
+		STDMETHOD(raw_OnRedirect) (MSXML2::IXMLHTTPRequest2* pXHR, LPWSTR pwszRedirectUrl) {
+			// TracePointDef: CMyCallback({m_bstrInstance})::IXMLHTTPRequest2Callback::OnRedirect({pwszRedirectUrl})
+			// Labels/Keywords:
+			return NOERROR;
+		}
+		STDMETHOD(raw_OnHeadersAvailable)(MSXML2::IXMLHTTPRequest2* pXHR, unsigned long dwStatus, LPWSTR pwszStatus) {
+			// TracePointDef: CMyCallback({m_bstrInstance})::IXMLHTTPRequest2Callback::OnHeadersAvailable({pwszStatus})
+			// Labels/Keywords:
+			return NOERROR;
+		}
+		STDMETHOD(raw_ondataavailable)(MSXML2::IXMLHTTPRequest2* pXHR, struct ISequentialStream* pResponseStream) {
+			// TracePointDef: CMyCallback({m_bstrInstance})::IXMLHTTPRequest2Callback::ondataavailable()
+			// Labels/Keywords:
+			return NOERROR;
+		}
+		STDMETHOD(raw_OnResponseReceived)(MSXML2::IXMLHTTPRequest2* pXHR, struct ISequentialStream* pResponseStream) {
+			// TracePointDef: CMyCallback({m_bstrInstance})::IXMLHTTPRequest2Callback::OnResponseReceived() ulDocumentSize: {ulDocumentSize}
+			// Labels/Keywords:
+			HRESULT hr = E_FAIL;
+			ULONG ulDocumentSize = 0;
+			do
+			{
+				BYTE buf[0x0400];
+				ULONG ulBytesRead = 0;
+				hr = pResponseStream->Read(buf, _countof(buf), &ulBytesRead);
+				ulDocumentSize += ulBytesRead;
+			} while (S_OK == hr);
+
+			// howto: notify the manager about finish???
+			return NOERROR;
+		}
+		STDMETHOD(raw_OnError)(MSXML2::IXMLHTTPRequest2* pXHR, HRESULT hrError) {
+			// TracePointDef: CMyCallback({m_bstrInstance})::IXMLHTTPRequest2Callback::OnError({hrError})
+			// Labels/Keywords:
+			return NOERROR;
+		}
+	private:
+		CComBSTR m_bstrInstance;
 	};
 	CComObject < CMyCallback >* pCB = NULL;
 	CComObject < CMyCallback >::CreateInstance(&pCB);
 
 	try
 	{
-		MSXML2::IXMLHTTPRequestPtr spRequest;
-		// HRESULT hr = spRequest.CreateInstance(L"Msxml2.ServerXMLHTTP.6.0");
-		HRESULT hr = spRequest.CreateInstance(L"Msxml2.XMLHTTP.6.0");
-		MSXML2::IXMLHTTPRequest2Ptr spRequest2(spRequest);
-		MSXML2::IServerXMLHTTPRequestPtr spServerRequest(spRequest);
-		MSXML2::IServerXMLHTTPRequest2Ptr spServerRequest2(spRequest);
+		/*
+		* welches object (CLSID) unterstuetzt den nun IXMLHTTPRequest2???
+		* HRESULT hr = spRequest.CreateInstance(L"Msxml2.ServerXMLHTTP.6.0"); // KEIN IXMLHTTPRequest2 support
+		* HRESULT hr = spRequest.CreateInstance(L"Msxml2.XMLHTTP.6.0"); // KEIN IXMLHTTPRequest2 support
+		* AUSSCHLIESSLICH: MSXML2::FreeThreadedXMLHTTP60
+		* Connecting using XML HTTP Request and IXMLHTTPRequest2, https://docs.microsoft.com/en-us/previous-versions/windows/apps/hh770550(v=win.10)
+		* obwohl IXMLHTTPRequest2 von IXMLHTTPRequest abgeleitet ist funktioniert ein QueryInterface(IXMLHTTPRequest) hier nicht???
+		*/
+		HRESULT hr = m_spRequest2.CreateInstance(__uuidof(MSXML2::FreeThreadedXMLHTTP60));
 
-		spRequest2->open(L"GET", L"http://www.estos.de/", pCB, NULL, NULL, NULL, NULL);
-		// spRequest2->setProperty(MSXML2::XHR_PROP_TIMEOUT, 1000);
-		spRequest2->send(NULL, 0);
+		// m_spRequest2->open(L"GET", L"http://anywhere/ping", pCB, NULL, NULL, NULL, NULL);
+		m_spRequest2->open(L"GET", L"http://localhost:1310/ping", pCB, NULL, NULL, NULL, NULL);
+		m_spRequest2->setProperty(MSXML2::XHR_PROP_TIMEOUT, 1000);
+		m_spRequest2->send(NULL, 0);
 	}
 	catch (const _com_error& e)
 	{

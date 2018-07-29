@@ -64,6 +64,7 @@ public:
 #endif
 
 private:
+	MSXML2::IXMLHTTPRequest2Ptr m_spRequest2;
 	CString m_strConfigFile;
 	int m_TimerStressPos; // current value;
 	BOOL m_bRegisterSessionNotification;
