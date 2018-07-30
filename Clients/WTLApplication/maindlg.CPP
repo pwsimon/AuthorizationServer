@@ -512,6 +512,23 @@ void CMainDlg::SetTimerStressPos(int iNewPos)
 
 LRESULT CMainDlg::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+#ifdef XMLHTTP_SERVERREQUEST
+	try
+	{
+		// wir muessen wollen IRGENDWANN DEFINITIV schluss machen. ergo irgendwann im OnIdle z.B.
+		VARIANT_BOOL varbRetC = m_spServerRequest->waitForResponse(1000l);
+		const long lReadyState = m_spServerRequest->readyState;
+		const long lStatus = m_spServerRequest->status;
+		_bstr_t bstrResult = m_spServerRequest->responseText;
+	}
+	catch (const _com_error& e)
+	{
+		CComBSTR bstrMsg = e.ErrorMessage();
+		// TracePointDef: IServerXMLHTTPRequest::open(L"GET", L"http://anywhere/ping", VARIANT_TRUE) failed: {bstrMsg}
+		HRESULT hr = e.Error();
+	}
+#endif
+
 	CSimpleDialog<IDD_ABOUTBOX, FALSE> dlg;
 	dlg.DoModal();
 	return 0;
@@ -562,19 +579,16 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 	}
 #endif
 
-#ifdef XMLHTTP_MSHTML
+#ifdef XMLHTTP_MSHTML_DOMAINREQUEST
 	try
 	{
-		IUnknownPtr spXHR(__uuidof(MSHTML::XDomainRequest));
+		// IUnknownPtr spXHR(MSHTML::HTMLXMLHttpRequest));
 
 		MSHTML::IHTMLXDomainRequestFactoryPtr spFactory;
-		HRESULT hr = spFactory.CreateInstance(__uuidof(MSHTML::XDomainRequestFactory));
+		HRESULT hr = spFactory.CreateInstance(__uuidof(MSHTML::HTMLXMLHttpRequestFactory)); // XDomainRequestFactory
 		MSHTML::IHTMLXMLHttpRequestPtr spRequest(spFactory->create());
 		// spRequest->onreadystatechange = NULL;
 		spRequest->open(L"GET", L"http://www.estos.de/", VARIANT_FALSE);
-
-		MSHTML::IHTMLXMLHttpRequest2Ptr spRequest2(spRequest);
-		// spRequest2->ontimeout = NULL;
 
 		spRequest->send();
 		_bstr_t bstrResult = spRequest->responseText;
@@ -582,6 +596,8 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 	}
 	catch (const _com_error& e)
 	{
+		CComBSTR bstrMsg = e.ErrorMessage();
+		HRESULT hr = e.Error();
 	}
 #endif
 
@@ -657,6 +673,89 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 	catch (const _com_error& e)
 	{
 		CComBSTR bstrMsg = e.ErrorMessage();
+		HRESULT hr = e.Error();
+	}
+#endif
+
+#ifdef XMLHTTP_SERVERREQUEST
+	class ATL_NO_VTABLE CMyCallback :
+		  public CComObjectRootEx < CComSingleThreadModel >
+		, public CComCoClass < CMyCallback >
+		, public IPersistImpl < CMyCallback >
+		, public IDispEventSimpleImpl </*nID =*/ ID_XMLHTTPREQUESTEVENTS, CMyCallback, &__uuidof(MSXML2::XMLDOMDocumentEvents) >
+	{
+		BEGIN_COM_MAP(CMyCallback)
+			COM_INTERFACE_ENTRY(IPersist)
+		END_COM_MAP()
+
+		BEGIN_SINK_MAP(CMyCallback)
+			SINK_ENTRY_INFO(/*nID =*/ ID_XMLHTTPREQUESTEVENTS, __uuidof(MSXML2::XMLDOMDocumentEvents), /*dispid =*/ 0, OnReadyStateChange, &OnEventInfo)
+		END_SINK_MAP()
+
+		CMyCallback() {}
+		~CMyCallback() {}
+
+		// IXMLDOMDocumentsEvent
+		void __stdcall OnReadyStateChange()
+		{
+			// TracePointDef: CMyCallback({m_bstrInstance})::IXMLDOMDocumentsEvent::OnReadyStateChange()
+			// Labels/Keywords:
+			try
+			{
+				switch (m_spServerRequest->readyState)
+				{
+					case READYSTATE_COMPLETE: // = 4
+					{
+						// TracePointDef: CMyCallback({m_bstrInstance})::IXMLDOMDocumentsEvent::OnReadyStateChange() READYSTATE_COMPLETE {bstrStatusText}
+						_bstr_t bstrStatusText = m_spServerRequest->statusText;
+						long lStatus = m_spServerRequest->status;
+						// call custom callback
+						m_spServerRequest->onreadystatechange = NULL;
+						m_spServerRequest.Release();
+					}
+					break;
+				}
+			}
+			catch (const _com_error& e)
+			{
+				CComBSTR bstrMsg = e.ErrorMessage();
+				// TracePointDef: CMyCallback({m_bstrInstance})::IXMLDOMDocumentsEvent::OnReadyStateChange() failed: {bstrMsg}
+				HRESULT hr = e.Error();
+			}
+		}
+	public:
+		CComBSTR m_bstrInstance;
+		MSXML2::IServerXMLHTTPRequestPtr m_spServerRequest;
+	};
+	CComObject < CMyCallback >* pCB = NULL;
+	CComObject < CMyCallback >::CreateInstance(&pCB);
+
+	try
+	{
+		m_spServerRequest.CreateInstance(L"Msxml2.ServerXMLHTTP.6.0");
+		/* if (m_spServerRequest)
+			m_spServerRequest->setTimeouts(1 * 1000, 1 * 1000, 1 * 1000, 1 * 1000); */
+
+		pCB->m_spServerRequest = m_spServerRequest;
+		IDispatchPtr spCB;
+		pCB->_LocDEQueryInterface(IID_PPV_ARGS(&spCB));
+		m_spServerRequest->onreadystatechange = spCB;
+		/*
+		* asynchron passiert NICHTS??? wenn z.B. der URL NICHT erreichbar ist
+		* wir sind zwingend auf eine MANUELLE ueberwachung per waitForResponse() angewiesen!!!
+		*/
+		m_spServerRequest->open(L"GET", L"http://anywhere/ping", VARIANT_TRUE);
+		// m_spServerRequest->open(L"GET", L"http://www.estos.de/", VARIANT_TRUE);
+
+		// m_spServerRequest->open(L"GET", L"http://anywhere/ping", VARIANT_FALSE); // synchron gibt es eine exception
+
+		m_spServerRequest->send();
+		// wir muessen wollen IRGENDWANN DEFINITIV schluss machen. ergo siehe OnAppAbout()
+	}
+	catch (const _com_error& e)
+	{
+		CComBSTR bstrMsg = e.ErrorMessage();
+		// TracePointDef: IServerXMLHTTPRequest::open(L"GET", L"http://anywhere/ping", VARIANT_TRUE) failed: {bstrMsg}
 		HRESULT hr = e.Error();
 	}
 #endif

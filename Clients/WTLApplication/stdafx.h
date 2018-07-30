@@ -81,9 +81,9 @@ extern CAppModule _Module;
 
 /*
 * auch das mshtml bringt ein XHR Object mit nur ich kann KEINE instance erzeugen
-#define XMLHTTP_MSHTML
+#define XMLHTTP_MSHTML_DOMAINREQUEST
 */
-#ifdef XMLHTTP_MSHTML
+#ifdef XMLHTTP_MSHTML_DOMAINREQUEST
 	#import <mshtml.tlb> no_function_mapping
 #endif
 
@@ -102,9 +102,10 @@ extern CAppModule _Module;
 * "Msxml2.XMLHTTP.6.0"       -> "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729)"
 */
 #import <msxml6.dll> no_function_mapping
+#define XMLHTTP_SERVERREQUEST
 #define XMLHTTP_COMPONENT L"Msxml2.ServerXMLHTTP.6.0"
-// #define XMLHTTP_COMPONENT L"Msxml2.XMLHTTP.6.0"
 // #define XMLHTTP_COMPONENT __uuidof(MSXML2::ServerXMLHTTP60)
+// #define XMLHTTP_COMPONENT L"Msxml2.XMLHTTP.6.0"
 
 /*
 * das msxml6.dll bringt MEHRERE XHR Object mit. im besonderen eines das auch fuer UWP's geeignet ist

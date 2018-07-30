@@ -205,8 +205,8 @@ public:
 		MSXML2::IServerXMLHTTPRequestPtr spServerRequest(m_spRequest);
 		if (spServerRequest)
 		{
+			spServerRequest->setTimeouts(1 * 1000, 1 * 1000, 1 * 1000, 1 * 1000);
 			// spServerRequest->setOption(MSXML2::SXH_OPTION_URL, L"");
-			spServerRequest->setTimeouts(5 * 1000, 5 * 1000, 5 * 1000, 5 * 1000);
 		}
 
 		// add sink to xml http request
