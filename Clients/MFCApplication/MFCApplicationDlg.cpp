@@ -172,7 +172,7 @@ void CMFCApplicationDlg::OnBnClickedRunping()
 */
 	CSimulatorPing* pSimulatorPing = DYNAMIC_DOWNCAST(CSimulatorPing, RUNTIME_CLASS(CSimulatorPing)->CreateObject());
 	ASSERT(1 == pSimulatorPing->m_dwRef); // MFC Standard
-	pSimulatorPing->Init(_T("SimulatorClientId"));
+	pSimulatorPing->Init(_T("SimulatorAzureClientId"));
 
 	m_lstCmd.push_back(pSimulatorPing);
 }

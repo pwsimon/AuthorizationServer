@@ -42,12 +42,12 @@ IMPLEMENT_DYNCREATE(CSimulatorPing, CoAuthServiceCall)
 
 HRESULT CSimulatorPing::Init(LPCTSTR szClientId)
 {
-	return __super::Init(_T("GET"), _T("http://simulatorauthserver-1310.appspot.com/ping"));
+	return __super::Init(_T("GET"), _T("https://simulatorsvc.azurewebsites.net/ping"));
 }
 
 /*virtual*/ HRESULT CSimulatorPing::GetTokenServer(oAuthLib::IAuthorize** ppAuthorize)
 {
-	const CString strMonikerName = CSimulatorWf::FileMonikerDN4TokenResponse(_T("SimulatorClientId"));
+	const CString strMonikerName = CSimulatorWf::FileMonikerDN4TokenResponse(_T("SimulatorAzureClientId"));
 	return CSimulatorWf::GetTokenServerByDisplayName(strMonikerName, ppAuthorize);
 }
 
