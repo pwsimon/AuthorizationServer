@@ -515,9 +515,10 @@ LRESULT CMainDlg::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*
 #ifdef XMLHTTP_SERVERREQUEST
 	try
 	{
+		// TracePointDef: IServerXMLHTTPRequest::open(L"GET", L"http://anywhere/ping", VARIANT_TRUE) finished: {lStatus}
 		// wir muessen wollen IRGENDWANN DEFINITIV schluss machen. ergo irgendwann im OnIdle z.B.
-		VARIANT_BOOL varbRetC = m_spServerRequest->waitForResponse(1000l);
 		const long lReadyState = m_spServerRequest->readyState;
+		VARIANT_BOOL varbRetC = m_spServerRequest->waitForResponse(1000l);
 		const long lStatus = m_spServerRequest->status;
 		_bstr_t bstrResult = m_spServerRequest->responseText;
 	}
@@ -527,6 +528,7 @@ LRESULT CMainDlg::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*
 		// TracePointDef: IServerXMLHTTPRequest::open(L"GET", L"http://anywhere/ping", VARIANT_TRUE) failed: {bstrMsg}
 		HRESULT hr = e.Error();
 	}
+	m_spServerRequest.Release();
 #endif
 
 	CSimpleDialog<IDD_ABOUTBOX, FALSE> dlg;
@@ -693,7 +695,9 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 		END_SINK_MAP()
 
 		CMyCallback() {}
-		~CMyCallback() {}
+		~CMyCallback() {
+			// TracePointDef: CMyCallback({m_bstrInstance})::~CMyCallback()
+		}
 
 		// IXMLDOMDocumentsEvent
 		void __stdcall OnReadyStateChange()
@@ -724,7 +728,7 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 			}
 		}
 	public:
-		CComBSTR m_bstrInstance;
+		_bstr_t m_bstrInstance;
 		MSXML2::IServerXMLHTTPRequestPtr m_spServerRequest;
 	};
 	CComObject < CMyCallback >* pCB = NULL;
@@ -744,11 +748,14 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 		* asynchron passiert NICHTS??? wenn z.B. der URL NICHT erreichbar ist
 		* wir sind zwingend auf eine MANUELLE ueberwachung per waitForResponse() angewiesen!!!
 		*/
-		m_spServerRequest->open(L"GET", L"http://anywhere/ping", VARIANT_TRUE);
-		// m_spServerRequest->open(L"GET", L"http://www.estos.de/", VARIANT_TRUE);
+		// const _bstr_t bstrURL(L"http://anywhere/ping");
+		const _bstr_t bstrURL(L"http://www.estos.de/");
+		pCB->m_bstrInstance = bstrURL;
+		m_spServerRequest->open(L"GET", bstrURL, VARIANT_TRUE);
 
-		// m_spServerRequest->open(L"GET", L"http://anywhere/ping", VARIANT_FALSE); // synchron gibt es eine exception
+		// m_spServerRequest->open(L"GET", bstrURL, VARIANT_FALSE); // synchron gibt es eine exception
 
+		// TracePointDef: IServerXMLHTTPRequest::send(L"GET", {bstrURL}, VARIANT_TRUE)
 		m_spServerRequest->send();
 		// wir muessen wollen IRGENDWANN DEFINITIV schluss machen. ergo siehe OnAppAbout()
 	}
@@ -760,6 +767,7 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 	}
 #endif
 
+#ifdef PRODUCTIVE_WORK
 	CComObject < CSimulatorPing >* pTask = NULL;
 	HRESULT hr = CComObject < CSimulatorPing >::CreateInstance(&pTask);
 	if(!m_strConfigFile.IsEmpty())
@@ -770,6 +778,7 @@ LRESULT CMainDlg::OnBnClickedRunping(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 #endif
 
 	pTask->Init(m_hWnd);
+#endif
 
 	return 0;
 }

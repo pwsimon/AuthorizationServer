@@ -102,7 +102,7 @@ extern CAppModule _Module;
 * "Msxml2.XMLHTTP.6.0"       -> "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729)"
 */
 #import <msxml6.dll> no_function_mapping
-#define XMLHTTP_SERVERREQUEST
+// #define XMLHTTP_SERVERREQUEST
 #define XMLHTTP_COMPONENT L"Msxml2.ServerXMLHTTP.6.0"
 // #define XMLHTTP_COMPONENT __uuidof(MSXML2::ServerXMLHTTP60)
 // #define XMLHTTP_COMPONENT L"Msxml2.XMLHTTP.6.0"
@@ -111,6 +111,9 @@ extern CAppModule _Module;
 * das msxml6.dll bringt MEHRERE XHR Object mit. im besonderen eines das auch fuer UWP's geeignet ist
 #define XMLHTTP_FREETHREADEDXMLHTTP60
 */
+
+// if neither is defined: XMLHTTP_WINHTTP, XMLHTTP_FREETHREADEDXMLHTTP60, XMLHTTP_SERVERREQUEST, ...
+#define PRODUCTIVE_WORK
 
 // the "AuthorizationServer" itself
 #ifdef _DEBUG

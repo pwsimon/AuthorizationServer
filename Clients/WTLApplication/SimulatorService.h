@@ -27,8 +27,8 @@ public:
 		*     aktuell wird IPersistFile::Load() nur garantiert wenn eine commandline uebergeben wurde
 		*     was machen wir bei einem klassischen start per doppelclick???
 		*/
-		m_strClientId = _T("SimulatorClientId");
-		m_strUrl = _T("http://simulatorauthserver-1310.appspot.com/ping");
+		m_strClientId = _T("SimulatorAzureClientId");
+		m_strUrl = _T("https://simulatorsvc.azurewebsites.net/ping");
 		return NOERROR;
 	}
 
@@ -74,6 +74,22 @@ public:
 
 #ifdef MONITOR_PENDING_REQUESTS
 	HRESULT Abort() {
+#ifdef _DEBUG
+		try
+		{
+			// TracePointDef: CSimulatorPing({m_strUrl})::Abort() {lStatus}, {bstrStatus}
+			if (READYSTATE_LOADING < m_spRequest->readyState)
+			{
+				const long lStatus = m_spRequest->status;
+				_bstr_t bstrStatus = m_spRequest->statusText;
+			}
+			else
+				ATLTRACE(_T("CSimulatorPing(%s)::Abort() blocked/unsuccessfull\n"), (LPCTSTR)m_strUrl);
+		}
+		catch (const _com_error& e)
+		{
+		}
+#endif
 		return m_spRequest->abort();
 	}
 #endif
